@@ -1,0 +1,15 @@
+=========
+Tutorials
+=========
+
+A list of tutorials to understand the mechanics of Socon. These tutorials are
+a step by step guide on: Creating a project with a command, changing the
+behavior of a command, creating a manager and creating your own plugin.
+
+.. toctree::
+   :maxdepth: 1
+
+   1_project_and_command
+   2_change_behavior
+   3_manager
+   4_plugins

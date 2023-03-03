@@ -1,0 +1,61 @@
+Exceptions
+==========
+
+This document contains every exceptions that Socon can raise.
+
+Socon core exceptions
+=====================
+
+.. module:: socon.core.exceptions
+    :synopsis: Socon core exceptions
+
+Socon core exception classes are defined in ``socon.core.exceptions``.
+
+``ImproperlyConfigured``
+------------------------
+
+.. exception:: ImproperlyConfigured
+
+    The :exc:`ImproperlyConfigured` exception is raised when Socon is
+    somehow improperly configured -- for example, if a value in ``settings.py``
+    is incorrect or unparseable.
+
+``RegistryNotReady``
+--------------------
+
+.. exception:: RegistryNotReady
+
+    This exception is raised when attempting to use a config registry
+    when it hasn't been populated yet.
+
+``CommandNotFound``
+-------------------
+
+.. exception:: CommandNotFound
+
+    The :exc:`CommandNotFound` is raised when the command manager cannot
+    find the command that needs to be run.
+
+``ManagerNotHooked``
+--------------------
+
+.. exception:: ManagerNotHooked
+
+    The :exc:`ManagerNotHooked` is raised when we try to a access a hook
+    in a manager that does not contain any hooks.
+
+``ManagerNotFound``
+-------------------
+
+.. exception:: ManagerNotFound
+
+    The :exc:`ManagerNotFound` is raised by :meth:`BaseManager.get_manager`
+    if the manager does not exist.
+
+``HookNotFound``
+----------------
+
+.. exception:: HookNotFound
+
+    The :exc:`HookNotFound` is raised by :meth:`BaseManager.find_hooks_impl`
+    when the hook is not found in any registry configurations.

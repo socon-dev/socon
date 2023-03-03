@@ -1,0 +1,67 @@
+========
+Terminal
+========
+
+.. module:: socon.utils.terminal
+
+.. note::
+
+    The code for ``socon.utils.terminal`` was initially copied from
+    pytest 7.2, file src/_pytest/terminal.py.
+    Link to the project: https://github.com/pytest-dev/pytest
+
+This document will present the :class:`TerminalWriter` that Socon use
+to print information in the terminal. We believe that this can be really
+useful for Socon based framework to display information in the terminal.
+
+TerminalWriter objects
+======================
+
+.. class:: TerminalWriter
+
+Base class to write information on the terminal.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: TerminalWriter.stream
+
+    The output stream of the terminal. If not specified at the terminal
+    creation, the default stream is ``sys.stdout``.
+
+Read-only attributes
+--------------------
+
+.. attribute:: TerminalWriter.fullwidth
+
+    Return the current size of the terminal.
+
+Methods
+-------
+
+.. method:: sep(sepchar: str, title: str = None, fullwidth: int = None)
+
+    Create a separator line with or without a title. By default the
+    separator will use the fullwidth of the terminal. A specific width
+    can be passed to the function if required.
+
+.. method:: write(msg: str, *, flush: bool = False)
+
+    Write a message to the terminal.
+
+.. method:: line(msg: str)
+
+    Write a message that will end with a new line.
+
+.. method:: flush()
+
+    Flush the stream output buffer. The write everything in the buffer
+    to the terminal.
+
+.. method:: rewrite(line: str, erase: bool = False)
+
+    Rewinds the terminal cursor to the beginning and writes the given line.
+
+.. method:: underline(msg: str, decorator: str = '-')
+
+    Underline a message with a decorator.

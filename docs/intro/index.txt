@@ -1,0 +1,14 @@
+===============
+Getting started
+===============
+
+New to Socon? Ready for a real experience? Well, you came to the right
+place. Read this material to quickly get up and running.
+
+.. toctree::
+   :maxdepth: 1
+
+   overview
+   install
+   environment
+   tutorials/index

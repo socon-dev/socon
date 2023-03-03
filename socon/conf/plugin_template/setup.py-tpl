@@ -1,0 +1,13 @@
+"""Python setup.py for {{ plugin_name }} package"""
+
+from setuptools import find_packages, setup
+from pathlib import Path
+
+
+setup(
+    name="{{ plugin_name }}",
+    version="0.1.0",
+    description="project_description",
+    long_description=open('README.rst').read(),
+    packages=find_packages()
+)

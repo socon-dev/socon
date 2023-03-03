@@ -1,0 +1,180 @@
+========================
+Create your first plugin
+========================
+
+Nowadays, plugins are everywhere, it allows you to develop a piece of software
+that you can easily share with everyone. Socon supports plugins and we will
+see in this tutorial how to create one and how to integrate it to your own
+framework.
+
+Create the plugin
+=================
+
+First thing is to create the plugin. For that Socon implements a command
+to automatically do it. You will notice that plugin are similar to projects. The
+only major difference remains on how they are initialized and how they
+interact with your framework.
+
+Let's create your plugin next to your tutorial container::
+
+    space_plugin/
+    tutorial/
+        tutorial/
+            ...
+        manage.py
+
+You can stay inside the tutorial container and type:
+
+.. code-block:: console
+
+    $ python manage.py createplugin space_plugin --target ../space_plugin
+
+.. note::
+
+    This will automatically create the folder if it does not already exist.
+    If you are not in the container you can always use the socon admin common
+    ``socon createplugin space_plugin --target path/to/the/folder``
+
+This command will create a directory ``space_plugin``, which will look like this::
+
+    space_plugin/
+        space_plugin/
+            __init__.py
+            plugins.py
+        README.rst
+        setup.py
+
+* The outer :file:`space_plugin/` root directory is your plugin that will
+  hold it's configuration and every commands, hooks and managers that will
+  help others develop robust and reliable framework.
+
+* :file:`README.rst`: Everyone knows that file. Document it well and explain
+  how your plugin works and how to use it.
+
+* :file:`setup.py`: From `distutils docs`_: "The setup script is the center of all
+  activity in building, distributing, and installing modules using the Distutils"
+
+* :file:`space_plugin/plugins.py`: Plugin configuration file. Help Socon find
+  and register the plugin when called by the user.
+
+Plugins works like project. You can define commands, managers and hooks to
+be available for everyone. This plugin will be very simple and will
+have one command that count the number of spacecraft by project. We assume that
+we are aware that the framework ``tutorial`` has a module :file:`spacecraft.py`. You
+will then have to imagine what you can do with a plugin! We can't do all the work
+for you!
+
+Let's create a general command for our ```space_plugin``. Yes a general command
+because we don't care about having a project. We just want to know how many
+spacecraft there is in all the projects::
+
+    space_plugin/
+        space_plugin/
+            __init__.py
+            management/
+                __init__.py
+                commands/
+                    __init__.py
+                    count.py
+            plugins.py
+
+The code for :file:`count.py`:
+
+.. code-block:: python
+
+    from socon.core.manager.base import BaseManager
+    from socon.core.management.base import BaseCommand, Config
+    from socon.core.registry import projects
+
+
+    class CountSpaceCraft(BaseCommand):
+        name = 'count'
+
+        def handle(self, config: Config) -> None:
+            # Get the spacecraft manager and find all hooks across the framework
+            manager = BaseManager.get_manager('spacecraft')
+            manager.find_all()
+
+            # Iterate over all project configuration and get all spacecrafts
+            for project_config in projects.get_registry_configs():
+                spacecrafts = manager.get_hooks(project_config)
+                print("{} project contains {} spacecraft:".format(
+                    project_config.label, len(spacecrafts)
+                ))
+                for spacecraft in spacecrafts:
+                    print(f"\t{spacecraft()}")
+
+
+Socon allows you to iterate over all the project configuration using the socon
+``projects`` registry. You can get more information :doc:`here </ref/registry>`.
+The :meth:`~socon.core.manager.BaseManager.get_hooks`: method gives your the access
+to every spacecraft defined in every project configuration.
+
+Now, in order to use our plugin we need to install the plugin and register
+it inside the tutorial container.
+
+.. note::
+
+    It is really important that you install the plugin in the same
+    environment than the one you are using for the tutorial. Otherwise
+    Socon won't find it when registering the plugin. Normally you already
+    are in a virtual environment if you followed the installation instructions.
+
+To install the plugin be sure to be inside the plugin and type:
+
+.. code-block:: console
+
+    $ pip install -e .
+
+To verify that it is installed you can just type:
+
+.. code-block:: console
+
+    $ python -m space_plugin
+
+Now we need to install it in our tutorial container. For that we will
+use the general settings. Some might have already noticed but there is
+a ``INSTALLED_PLUGINS`` variable.
+
+.. code-block:: python
+
+    INSTALLED_PLUGINS = [
+        'space_plugin'
+    ]
+
+To check that Socon found it, you can start the ``python manager.py --help``.
+The command will show you something like this::
+
+    ...
+
+    Plugins commands
+    ----------------
+
+    [space_plugin]
+
+        count (G)
+
+    ...
+
+Last step is to execute the command. As it's a general command no need to
+specify a project. Be sure to be in the tutorial container and type:
+
+.. code-block:: console
+
+    $ python manage.py count
+
+You should get something like this:
+
+.. code-block:: console
+
+    artemis project contains 1 spacecraft:
+            Orion
+    apollo project contains 1 spacecraft:
+            Saturn IB
+
+Congratulations! You have created your first plugin. This is our last tutorial for
+the moment. We will try to make more in order to show more functionalities
+of Socon. Now you can give place to your creativity and create generic and
+reliable framework for you, your friends or your company.
+
+.. _distutils docs: https://docs.python.org/3/distutils/setupscript.html

@@ -1,0 +1,137 @@
+List of settings
+================
+
+Here's a list of settings available in Socon core and their default values. You
+can access these settings at any time by import the ``settings`` object
+``from socon.conf import settings``.
+
+.. setting:: INSTALLED_PLUGINS
+
+``INSTALLED_PLUGINS``
+---------------------
+
+Default: ``[]`` (Empty list)
+
+A list of strings designating all plugins that are installed in the current
+Socon container. Each string should be a doted path to:
+
+* A plugging configuration class, or
+* a package containing the plugin
+
+:doc:`Learn more about plugin configurations </ref/registry>`.
+
+.. admonition:: Use the plugin registry for introspection
+
+    Your code should never access to the ``INSTALLED_PLUGINS`` directly. Use
+    :attr:`socon.core.registry.registry.plugins`.
+
+.. admonition:: Plugin names and labels should be unique in
+                :setting:`INSTALLED_PLUGINS`
+
+    Plugin :attr:`names <socon.core.registry.PluginConfig.name>` - the dotted
+    path to the plugin package - must be unique. There is no way to include
+    the same plugin twice.
+
+    This rule apply regardless of whether :setting:`INSTALLED_PLUGINS`
+    references plugin configuration classes or plugin packages.
+
+.. setting:: INSTALLED_PROJECTS
+
+``INSTALLED_PROJECTS``
+----------------------
+
+Default: ``[]`` (Empty list)
+
+A list of strings designating all projects that are installed in the current
+Socon container. Each string should be a doted path to:
+
+* A project configuration class, or
+* a package containing the project
+
+:doc:`Learn more about project configurations </ref/registry>`.
+
+.. admonition:: Use the project registry for introspection
+
+    Your code should never access to the ``INSTALLED_PROJECTS`` directly. Use
+    :attr:`socon.core.registry.projects`.
+
+.. admonition:: Project names and labels should be unique in
+                :setting:`INSTALLED_PROJECTS`
+
+    Project :attr:`names <socon.core.registry.ProjectConfig.name>` - the dotted
+    path to the project package - must be unique. There is no way to include
+    the same project twice.
+
+    Project :attr:`labels <socon.core.registry.ProjectConfig.label>` — by default
+    the final part of the name — must be unique too. For example, you can't
+    include both ``project.artemis.foo`` and ``project.apollo.foo``. However, you
+    can relabel a project with a custom configuration that defines a
+    different :attr:`socon.core.registry.ProjectConfig.label`.
+
+    These rules apply regardless of whether :setting:`INSTALLED_PROJECTS`
+    references project configuration classes or project packages.
+
+.. setting:: SKIP_ERROR_ON_PROJECTS_IMPORT
+
+``SKIP_ERROR_ON_PROJECTS_IMPORT``
+---------------------------------
+
+Default: ``True``
+
+If ``True``, Socon will not raise any error when importing the projects if one
+of them raise an error. You would want to leave this setting at ``True`` if
+you don't have any dependency between your projects. This setting exist,
+because by default Socon loads all projects at start and import all commands.
+If someone breaks a command module you don't want that to impact your project
+when you will start you command.
+
+When you use the :socon-admin:`help` command. You can see at the end of
+the helper the projects that didn't load correctly. You can the use
+the :socon-admin:`check` command to raise all errors.
+
+If ``False``, Socon will raise the error each time a project didn't load
+correctly. This is useful if you have dependency in projects and want all
+you projects to be up and running.
+
+.. setting:: LOGGING
+
+``LOGGING``
+-----------
+
+Default: ``{}`` (Empty dictionary)
+
+A data structure containing configuration information. The contents of
+this data structure will be passed as the argument to the
+configuration method described in :setting:`LOGGING_CONFIG`.
+
+.. setting:: LOGGING_CONFIG
+
+``LOGGING_CONFIG``
+------------------
+
+Default: ``logging.config.dictConfig``
+
+A path to a callable that will be used to configure logging in the
+Socon container. Points at an instance of Python's `dictConfigRef`_
+configuration method by default.
+
+If you set :setting:`LOGGING_CONFIG` to ``None``, the logging
+configuration process will be skipped.
+
+Core Settings Topical Index
+===========================
+
+Registry
+--------
+
+* :setting:`INSTALLED_PLUGINS`
+* :setting:`INSTALLED_PROJECTS`
+* :setting:`SKIP_ERROR_ON_PROJECTS_IMPORT`
+
+Logging
+-------
+
+* :setting:`LOGGING`
+* :setting:`LOGGING_CONFIG`
+
+.. _dictConfigRef: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema

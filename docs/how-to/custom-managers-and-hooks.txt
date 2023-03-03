@@ -1,0 +1,288 @@
+=========================
+Custom managers and hooks
+=========================
+
+This document will explain how managers and hooks are used in Socon and how you can use
+it in your own framework. Managers and hooks are powerful features of Socon that
+will make your framework generic and maintainable.
+
+.. note::
+
+    A :doc:`tutorial </intro/tutorials/3_manager>` is available on
+    managers and hooks that you should do if you are new to Socon.
+
+Manager
+=======
+
+The term **manager** in Socon describes a super class that provides features
+to find, register and manipulate ``hooks``. For example, the commands management
+module contain a ``CommandManager`` which inherit from the base class
+:class:`~socon.core.manager.BaseManager`. This class, registers every command that
+are in the ``management/commands`` directory alongside the configuration in which
+they are linked to.
+
+By subclassing your class from the :class:`~socon.core.manager.BaseManager` and by
+explicitly placing your managers class into a file called :file:`managers.py` at
+the root of a plugin, a project or in the common space; Socon will automatically
+register that class as a ``manager``. When you create your manager, you will need
+to define two mandatory attributes:
+
+#. :attr:`~socon.core.manager.BaseManager.name`: The name of the manager. This name
+   must be unique across your entire framework including the plugins.
+
+#. :attr:`~socon.core.manager.BaseManager.lookup_module`: The full python path to
+   the module that contains hooks linked to this manager.
+
+Here is quick example. Let's create a ``BuildManager`` at the root of the
+common space in the ``manager.py`` like so::
+
+    myframework/
+        myframework/
+            __init__.py
+            management/
+            managers.py
+        manage.py
+
+Let's have a closer look to the :file:`managers.py`:
+
+.. code-block:: python
+    :caption: myframework/managers.py
+
+    from socon.core.manager import BaseManager
+
+
+    class BuildManager(BaseManager):
+        name = 'build'
+        lookup_module = 'builder'
+
+When Socon starts, it registers all registry configurations and imports at the
+same time every :file:`managers.py`. The import registers every ``manager`` in the
+:attr:`~socon.core.manager.BaseManager._managers` private attribute.
+
+.. _access-your-managers:
+
+Access your managers
+--------------------
+
+You can access any manager using the :meth:`~socon.core.manager.BaseManager.get_manager`
+method. Here is an example to get the ``BuildManager`` manager. We
+will pretend to have a ``build`` command that will access this manager.
+
+.. code-block:: python
+    :caption: myframework/management/commands/build.py
+
+    from socon.core.management.base import ProjectCommand
+    from socon.core.manager import BaseManager
+
+
+    class BuildCommand(ProjectCommand):
+        name = 'build'
+
+    def handle(self, config, project_config):
+        manager = BaseManager.get_manager('build')
+
+Accessing your manager, will let you find, access and use your hooks.
+
+Module introspection
+--------------------
+
+When a manager searches for a hook, it calls the
+:meth:`~socon.core.manager.BaseManager.get_modules` method. This method by default
+returns the :attr:`RegistryConfig.name <socon.core.registry.RegistryConfig.name>` + the
+:attr:`~socon.core.manager.BaseManager.lookup_module`.
+For example: ``projects.apollo.builder`` if we are looking for the builder module
+inside the project ``apollo``. Then we import the module and every class that
+inherits from :class:`~socon.core.manager.Hook` will be registered to it's manager.
+
+By overriding the :meth:`~socon.core.manager.BaseManager.get_modules` method, you
+can provide your own way of finding modules. That is what we have done for
+the :class:`CommandManager`. The method returns every modules that are in the
+``management/commands`` directory.
+
+Hooks
+=====
+
+The term **hooks** in Socon describes a piece of code, generally a subclass
+of the base class :class:`~socon.core.manager.Hook` that a user can define to
+extend or replace the current code being executed.
+:class:`~socon.core.management.ProjectCommand` and
+:class:`~socon.core.management.BaseCommand` are hooks of a ``CommandManager``.
+All subclass of these two super classes, will be registered in the ``CommandManager``.
+
+.. note::
+
+    Hooks are nothing less than a class that is linked to a manager to do
+    anything you want. As we said in the beginning of this document
+    :class:`~socon.core.management.BaseCommand` and
+    :class:`~socon.core.management.ProjectCommand` inherit from
+    :class:`~socon.core.manager.Hook` and define how a command works.
+    Both of these classes are linked to the :class:`CommandManager` that defines
+    the way we find these commands and the way we print the helper when you
+    type ``python manage.py help``.
+
+By subclassing a class from the :class:`~socon.core.manager.Hook` base class,
+you make it discoverable by the manager it will be linked to.
+
+In our previous example, we have defined a ``BuildManager``. We now need
+to link hooks to this class. For that we must declare a Hook subclass and
+make it discoverable by placing it inside a ``builder.py`` module. Previously, we have
+define the :class:`BuildManager` with a ``lookup_module`` equal to ``builder``.
+Let's create a ``builder.py`` next to the ``managers.py``.
+
+.. code-block:: python
+    :caption: myframework/builder.py
+
+    from socon.core.manager import Hook
+
+
+    class SpaceCraftBuilder(Hook):
+        manager = 'spacecraft_manager'
+
+        # Name of the builder
+        name = "default_builder"
+
+        def build(self, spacecraft: SpaceCraft):
+            print("Building {}".format(spacecraft.name))
+
+The important thing here is the name of the manager that this hook and all it's
+subclass will be linked to. This is really important. If you forget it, when
+Socon will import the module, it will throw you an error.
+Every class that inherit from :class:`~socon.core.manager.Hook` must define
+the :attr:`~socon.core.manager.Hook.manager` attribute.
+
+.. note::
+
+    If you subclass ``SpaceCraftBuilder``, you don't need to redefine the
+    manager as it will be inherited.
+
+Access your hooks
+-----------------
+
+In order to access your hooks, you first need to :ref:`access your manager <access-your-managers>`.
+Then you need to search for hooks and for that you have two options:
+
+#. :meth:`~socon.core.manager.BaseManager.find_hooks_impl`. This method will look
+   for hooks in a specific config. This means that you will have to provide a for
+   example a :class:`~socon.core.registry.ProjectConfig`, and it will search for
+   every hook in that config.
+
+#. :meth:`~socon.core.manager.BaseManager.find_all`. This method will search in every
+   config. It will search in every installed config and in the common space.
+
+Now that you have searched for hooks, you can call the :meth:`~socon.core.manager.BaseManager.get_hook`
+method. This method, requires a :class:`RegistryConfig` like a :class:`~socon.core.registry.ProjectConfig`
+and the name of the hook to search for. Here is a quick example:
+
+.. code-block:: python
+
+    # ..
+    class BuildCommand(ProjectCommand):
+        name = 'build'
+
+    def handle(self, config, project_config):
+        manager = BaseManager.get_manager('build')
+        manager.find_all()
+        hook = manager.search_hook_impl(project_config, 'default_builder`)
+        builder = hook()
+        builder.build(
+            type('SpaceCraft', (object,), {'name': 'Saturn Ib'})()
+        )
+
+As seen above, we are retrieving the build manager that we have defined in our previous
+example. We request the manager to :meth:`~socon.core.manager.BaseManager.find_all`
+hooks in every config. Afterwards we get the ``builder``
+using the :meth:`~socon.core.manager.BaseManager.search_hook_impl` method and we
+initialize our builder. Finally we build our spacecraft.
+
+.. note::
+
+    We could have used the :meth:`~socon.core.manager.BaseManager.get_hook` method as
+    we know that there is a builder for that project. Be aware that if the hook
+    is not found using that method, it will return ``None``.
+
+.. _overiding-hooks:
+
+Overriding hooks
+----------------
+
+During the search (when we call the :meth:`~socon.core.manager.BaseManager.find_all` method),
+each hook is registered in a manager, like the ``BuildManager``,
+and saved alongside it's config object. When Socon looks for a hook using
+:meth:`~socon.core.manager.BaseManager.search_hook_impl` it will proceed as follows:
+
+    #. Did the user pass a config object?
+        Yes, search the hook for that config. It is found return it
+        else continue.
+
+    #. Search in the common space config for hooks.
+        If it's found return it else continue.
+
+    #. Search in the plugins.
+        If it's found return it else continue.
+
+    #. Search in built-in Socon hooks
+        if it's found return it else continue.
+
+    #. Raise :exc:`~socon.core.exceptions.HookNotFound`.
+
+To override a hook, the new hook must have the same name as the hook you want to
+override. They also need to be part of the same manager.
+Let's take an example to illustrate what we just said. Above, we have
+created a ``SpaceCraftBuilder``. Let's say that a project wants to implement
+its own builder with a specific feature. We would create a new ``SpaceCraftBuilder``
+in the project itself. This way, our builder is found first when we are looking for it.
+
+.. code-block:: python
+    :caption: projects/apollo/builder.py
+
+    from myframework.builder import SpaceCraftBuilder
+
+    class ProjectSpaceCraftBuilder(SpaceCraftBuilder):
+        name = 'default_builder`
+
+        def build(self, spacecraft: SpaceCraft):
+            self.prepare_docs()
+            super().build(spacecraft)
+
+        def prepare_docs(self):
+            print("Prepare documents before building the spacecraft")
+
+As you can see, the builder has the same name as the one we
+declared earlier. It also inherit from the one in the common space. This builder
+will do the exact same thing as the previous one but it will add a new
+method to prepare the documentation before building the spacecraft. Now
+when the manager will look for the `default_builder` hook, it will return
+this one first.
+
+.. _abstract-hooks:
+
+Abstract hooks
+--------------
+
+The term ``abstract`` means that the hook you will define will not
+be registered and available in the ``manager``. It is useful when
+you want to make a hook as an interface for other hooks.
+
+In our above example, we could have changed the ``SpaceCraftBuilder`` as a
+``BaseBuilder`` class defined as abstract. And then inherit from
+that class to create the ``SpaceCraftBuilder``.
+
+.. code-block:: python
+    :caption: myframework/builder.py
+
+    from socon.core.manager import Hook
+
+
+    class BaseBuilder(Hook, abstract=True):
+        manager = 'spacecraft_manager'
+
+        # Name of the builder
+        name = "default_builder"
+
+        def build(self, spacecraft: SpaceCraft):
+            raise NotImplementedError(...)
+
+    class SpaceCraftBuilder(Hook):
+
+        def build(self, spacecraft: SpaceCraft):
+            print("Building {}".format(spacecraft.name))

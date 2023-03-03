@@ -1,0 +1,203 @@
+========
+Commands
+========
+
+.. module:: socon.core.management
+
+This document references the base class for general and project commands.
+For information on how to use them and how to write your own commands,
+see :doc:`custom commands </how-to/custom-commands>`. You can also find a tutorial about
+commands :doc:`here </intro/tutorials/1_project_and_command>`
+
+Command objects
+===============
+
+.. class:: BaseCommand
+
+The base class from which all general management commands ultimately derive.
+
+Use this class if you want access to all of the mechanisms which
+parse the command-line arguments and work out what code to call in
+response. Subclassing this class, will make all your command general commands.
+
+Subclassing the :class:`BaseCommand` class requires that you implement the
+:meth:`~BaseCommand.handle` method.
+
+Attributes
+----------
+
+All attributes can be set in your derived class and can be used in
+:class:`BaseCommand`’s :ref:`subclasses<ref-basecommand-subclasses>`.
+
+.. attribute:: BaseCommand.help
+
+    A short description of the command, which will be printed in the
+    help message when the user runs the command
+    ``python manage.py help <command>``.
+
+.. attribute:: BaseCommand.missing_args_message
+
+    If your command defines mandatory positional arguments, you can customize
+    the message error returned in the case of missing arguments. The default is
+    output by :py:mod:`argparse` ("too few arguments").
+
+.. attribute:: BaseCommand.keep_extras_args
+
+    Boolean that let you keep extra arguments that have been passed to your
+    command. If you had the occasion to work with ``Argparse`` you know that
+    there is two methods to parse your args. The :meth:`parse_args` that
+    will throw you an error if you pass an argument that it doesn't know.
+    And the :meth:`parse_known_args` that gives you a tuple with a ``Namespace``
+    and a list of option of unknown arguments and their values. ``keep_extras_args``
+    register that list in the :attr:`Config.extras_args` attribute.
+
+.. attribute:: BaseCommand.name
+
+    Name of the command. This attribute is not mandatory. By default its value will be
+    the name of your command class in lowercase. If the name
+    of the class contains the word ``Command`` at the end of it like ``CreateCommand``.
+    The name will be stripped out and the final name will be ``create``.
+
+Methods
+-------
+
+:class:`BaseCommand` has a few methods that can be overridden. but only
+the :meth:`~BaseCommand.handle` method must be implemented.
+
+.. admonition:: Implementing a constructor in a subclass
+
+    If you implement ``__init__`` in your subclass of :class:`BaseCommand`,
+    you must call :class:`BaseCommand`’s ``__init__``::
+
+        class Command(BaseCommand):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                # ...
+
+.. method:: BaseCommand.create_parser(prog_name, subcommand, **kwargs)
+
+    Returns a ``CommandParser`` instance, which is an
+    :class:`~argparse.ArgumentParser` subclass with a few customizations for
+    Socon.
+
+    You can customize the instance by overriding this method and calling
+    ``super()`` with ``kwargs`` of :class:`~argparse.ArgumentParser` parameters.
+
+.. method:: BaseCommand.add_arguments(parser)
+
+    Entry point to add parser arguments to handle command line arguments passed
+    to the command. Custom commands should override this method to add both
+    positional and optional arguments accepted by the command. Calling
+    ``super()`` is not needed when directly subclassing ``BaseCommand``.
+
+.. method:: BaseCommand.get_version()
+
+    Returns Socon's version, which should be correct for all built-in Socon
+    commands. User-supplied commands can override this method to return their
+    own version.
+
+.. method:: BaseCommand.execute(*args, **options)
+
+    Tries to execute this command, performing system checks if needed (as
+    controlled by the :attr:`requires_system_checks` attribute). If the command
+    raises a :exc:`CommandError`, it's intercepted and printed to stderr.
+
+.. method:: BaseCommand.handle(config: :class:`Config`)
+
+    The actual logic of the command. Subclasses must implement this method.
+    It may return a string which will be printed to ``stdout``
+
+.. _ref-basecommand-subclasses:
+
+``BaseCommand`` subclasses
+--------------------------
+
+.. class:: ProjectCommand
+
+The base class from which all project management commands ultimately derive.
+
+Use this class if you want access all of the mechanisms which
+parse the command-line arguments and work out what code to call in
+response. Subclassing this class will make all your commands project dependent.
+It means that you must pass the :option:`--project` to make it work.
+
+Subclassing the :class:`ProjectCommand` class requires that you implement the
+:meth:`~BaseCommand.handle` method.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: projects
+
+    Set which projects can access this command. This argument
+    limits the access scope of the command. By default all projects
+    can have access to this command.
+
+Methods
+-------
+
+.. method:: ProjectCommand.handle(config, project_config)
+
+    The actual logic of the command. Subclasses must implement this method.
+    It may return a string which will be printed to ``stdout``
+
+Command exceptions
+------------------
+
+.. exception:: CommandError(returncode=1)
+
+Exception class indicating a problem while executing a management command.
+
+If this exception is raised during the execution of a management command from a
+command line console, it will be caught and turned into a nicely-printed error
+message to the appropriate output stream (i.e., stderr). As a result, raising
+this exception (with a sensible description of the error) is the preferred way
+to indicate that something has gone wrong in the execution of a command. It
+accepts the optional ``returncode`` argument to customize the exit status for
+the management command to exit with, using :func:`sys.exit`.
+
+.. _config-object:
+
+Config object
+=============
+
+.. class:: Config
+
+Base class that stores information about the command being executed. This
+class also provides nice features like a :doc:`terminal object </ref/terminal>`
+to help you write into the terminal and a temporary directory that is
+automatically clean at the end of the script.
+
+Attributes
+----------
+
+.. attribute:: Config.options
+
+    Argparse Namespace. Let you access the command line options as attribute.
+
+.. attribute:: Config.extras_args
+
+    Keep the extra arguments of the command if you set the
+    :attr:`BaseCommand.keep_extras_args` attribute to ``True``.
+
+.. attribute:: Config.tmpdir
+
+    Provide a temporary directory using ``tempfile.mkdtemp()``. This
+    tmpdir is automatically remove at program termination.
+
+.. attribute:: Config.terminal
+
+    Provide a terminal writer from ``socon.utils.terminal``. This terminal
+    can help you print formatted messages to the terminal. See more
+    here :doc:`/ref/terminal`
+
+Methods
+-------
+
+.. method:: Config.getoption(name: str, default=None, skip=True)
+
+    Return an option value. This function allows you to
+    pass a default value if not found or raise a :exc:`ValueError`
+
+    The :exc:`ValueError` is raised only if ``skip`` is set to ``False``.
+    Otherwise, ``getoption()`` will return ``None``

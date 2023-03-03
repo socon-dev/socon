@@ -1,0 +1,87 @@
+====================
+Socon documentation
+====================
+
+.. rubric:: Everything you need to know about Socon.
+
+.. _index-first-steps:
+
+First steps
+===========
+
+If you are new to Socon, this is the place to start!
+
+* **From scratch:**
+  :doc:`Overview <intro/overview>` |
+  :doc:`Installation <intro/install>`
+
+* **Tutorial:**
+  :doc:`Part 1: Create your first command <intro/tutorials/1_project_and_command>` |
+  :doc:`Part 2: Change command behavior across projects <intro/tutorials/2_change_behavior>` |
+  :doc:`Part 3: Create your first manager <intro/tutorials/3_manager>` |
+  :doc:`Part 4: Create your first plugin <intro/tutorials/4_plugins>`
+
+How the documentation is organized
+==================================
+
+Socon's developer try to put as many documentation as necessary to help you
+start with your framework. Here is a high-level overview on how it is organized:
+
+* :doc:`Tutorials </intro/index>`: This will walk you through a set of tutorials to create
+  your first container with different projects and commands. You will also
+  learn how to create your own manager and hooks to increase the possibility
+  of your framework. Last but not least, you will learn how to create your
+  own plugin in order to share your work with others.
+
+* :doc:`How-to guides </how-to/index>` guide you through the
+  steps involved in addressing key problems and use-cases.
+
+* :doc:`Reference guides </ref/index>` contain technical reference for APIs and
+  other aspects of Socon's framework.
+
+The development process
+=======================
+
+Learn about the various components and tools to help you in the development
+of Socon:
+
+* **Settings:**
+  :doc:`Overview <ref/settings>` |
+  :doc:`Full settings list <ref/list-of-settings>`
+
+* **Registry:**
+  :doc:`Projects and Plugins explained <ref/registry>`
+
+* **Commands:**
+  :doc:`Reference <ref/commands>` |
+  :doc:`Adding custom commands <how-to/custom-commands>`
+
+* **Manager:**
+  :doc:`Reference <ref/manager>` |
+  :doc:`Adding custom managers and hooks <how-to/custom-managers-and-hooks>`
+
+* **socon and manage.py:**
+  :doc:`The command line utility <ref/socon-admin>`
+
+* **Utility:**
+  :doc:`General utility <ref/utils>` |
+  :doc:`Terminal <ref/terminal>` |
+  :doc:`Logging <ref/logging>`
+
+* **Exceptions:**
+  :doc:`Overview <ref/exceptions>`
+
+The Socon open-source project
+==============================
+
+Get more information about the Socon project and how you can
+contribute and make it better.
+
+* **Community:**
+  :doc:`Get involved </internals/contributing>` |
+  `Socon on GitHub <https://github.com/socon-dev/socon>`_
+
+* **Process:**
+  :doc:`The release process </internals/release-process>` |
+  :doc:`Releases </internals/changelog>` |
+  :doc:`Deprecations </internals/deprecations>`

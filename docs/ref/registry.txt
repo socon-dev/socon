@@ -1,0 +1,433 @@
+========
+Registry
+========
+
+.. module:: socon.core.registry
+
+Socon contain multiple config registry. Two that stores installed projects and plugins
+configuration. One registry that store the configuration of Socon and the
+common space. This mean that we have three different registry:
+
+* A project registry: Store the installed projects configuration.
+
+* A plugin registry: Store the installed plugins configuration.
+
+* A common registry: Store two configuration. Socon core configuration and the
+  common space configuration that is created alongside the container.
+
+The registry is called :attr:`~socon.core.registry.registry` and it's available in
+:mod:`socon.core.registry`. It's the main registry that help you access
+configuration registries we mentioned above.
+
+As an example you could access socon configuration this way:
+
+.. code-block:: pycon
+
+    >>> from socon.core.registry import registry
+    >>> registry.common.get_registry_config('core`).name
+    'socon.core'
+
+.. warning::
+
+    At this time do not try to access :attr:`registry.projects` or the
+    :attr:`registry.plugins` as this two registry are not ready yet
+
+Container, projects and plugins
+===============================
+
+A **container** is a Socon based framework. The container Python package is defined
+primarily by a settings module, but it can also contains other module to
+extend the functionality of your framework. For example, when you run
+``socon createcontainer myframework``, you will get a ``myframework``
+container directory that contains a ``myframework`` Python package with the
+``settings.py`` module. This package is also the common space of your container.
+It's in that space that you should define all modules that are common to your
+projects::
+
+    myframework/ (root directory)
+        myframework/ (common space)
+            settings.py
+        projects/ (contain all projects)
+        manage.py
+
+The term **projects** in Socon describes a Python package that provides some
+set of features and configuration. A project is a place to define or re-define
+functionality that are common or not to other projects.
+
+Projects can include or not modules to extend their base functionality. these
+modules can be common to all the projects or re-defined by them.
+
+.. note::
+
+    It is important to understand that a Socon project is a set of code
+    that interacts with various parts of the framework. There's no such thing as
+    a ``Project`` object. However, there's a few places where Socon needs to
+    interact with installed projects, mainly for configuration and also for
+    introspection. That's why the project registry maintains metadata in an
+    :class:`ProjectConfig` instance for each installed project.
+
+The term **plugins** in Socon describes a Python package that provides some
+set of feature that can be shared in a container to increase the functionality
+of a Socon based framework. This was really important for us to integrate this in Socon.
+reusability matters and it's the way of life of Python. We wanted to gives
+the possibility to people to share their work and idea to everyone.
+
+Imagine that you have work on your Socon based framework that calculate
+the trajectory of a spaceship to go to space. You created a spaceship
+:doc:`/ref/manager` to get all the information about a spaceship (it's weight, it's length...)
+and a calculate command that will calculate and trace the trajectory.
+How do you make this reusable ? You want people to be able to simply define a
+spaceship and it will calculate everything for them. Well Socon provide a way
+to create plugin and there is a good :doc:`tutorial </intro/tutorials/4_plugins>`
+that explain everything for you.
+
+Configuring projects
+--------------------
+
+To configure a project, create a file:`projects.py` module inside the
+project, then define a subclass of :class:`ProjectConfig` there.
+
+.. note::
+
+    By default when you create a project ``socon createproject apollo``,
+    Socon will automatically create the :file:`projects.py` file for you.
+
+When :setting:`INSTALLED_PROJECTS` contains the dotted path to a project
+module, by default, if Socon finds exactly one :class:`ProjectConfig` subclass in
+the file:`projects.py` submodule, it uses that configuration for the project
+
+If no :class:`ProjectConfig` subclass is found, the base :class:`ProjectConfig` class
+will be used.
+
+Alternatively, :setting:`INSTALLED_PROJECTS` may contain the dotted path to a
+configuration class to specify it explicitly::
+
+    INSTALLED_PROJECTS = [
+        ...
+        'projects.myproject.projects.ApolloProjectConfig',
+        ...
+    ]
+
+Project config example:
+
+.. code-block:: python
+   :caption: projects/apollo/projects.py
+
+    from socon.core.registry.base import ProjectConfig
+
+    class ApolloConfig(ProjectConfig):
+        name = 'projects.apollo'
+
+.. important::
+
+    Each :class:`ProjectConfig` has a :attr:`~ProjectConfig.label`. This attribute
+    is the one that will be use when you call a command with the
+    :option:`--project` option. You can change the label to anything you
+    want but it must be unique across projects.
+
+.. _project-setting-file:
+
+Project setting file
+~~~~~~~~~~~~~~~~~~~~
+
+When you create a project, by default Socon will create a ``management`` directory
+with a ``config.py`` module. This module will save all the configuration
+of your project. It act the same as :doc:`Socon general settings </ref/settings>`
+but for your project. You can access all these settings using
+:meth:`ProjectConfig.get_setting` method.
+
+Configuring plugins
+-------------------
+
+To configure a plugin, create a file:`plugins.py` module inside the
+plugin, then define a subclass of :class:`PluginConfig` there.
+
+.. note::
+
+    By default when you create a plugin ``python -m socon createplugin superplug``,
+    Socon will automatically create the :file:`plugins.py` file for you.
+
+When :setting:`INSTALLED_PLUGINS` contains the dotted path to a plugin
+module, by default, if Socon finds exactly one :class:`PLuginConfig` subclass in
+the file:`plugins.py` submodule, it uses that configuration for the plugin.
+
+If no :class:`PluginConfig` subclass is found, the base :class:`PluginConfig` class
+will be used.
+
+Alternatively, :setting:`INSTALLED_PLUGINS` may contain the dotted path to a
+plugin configuration class to specify it explicitly::
+
+    INSTALLED_PLUGINS = [
+        ...
+        'suerplug.plugins.SuperPlugConfig',
+        ...
+    ]
+
+Plugin config example:
+
+.. code-block:: python
+   :caption: superplug/plugins.py
+
+    from socon.core.registry.base import PluginConfig
+
+    class SuperPlugConfig(PluginConfig):
+        name = 'superplug'
+
+.. _common-space:
+
+The common space
+================
+
+The term **common space** that we often use in Socon, refer to the container
+Python package. It's in that directory that we will find the :file:`settings.py`
+file and other file that will be consider as common to all projects.
+
+Let's imagine that you have ten different projects and all of them must
+access to a command that launch a spaceship into space. Instead of having this
+command in every projects, you create this command in the common space. This
+way, Socon will know that every project can call this command and launch
+there own spaceship.
+
+In the common space, you can register ``commands``, ``hooks`` and ``managers``.
+Socon will automatically register them for you and make them available for
+every projects.
+
+Registry configuration
+======================
+
+.. class:: RegistryConfig
+
+    The base class from which all config ultimately derive. Some
+    attributes can be configured in :class:`~socon.registry.RegistryConfig`
+    subclasses. Others are set by Socon and read-only.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: RegistryConfig.name
+
+    Full Python path to the config, e.g. ``'projects.apollo'``.
+
+    This attribute defines which config the configuration applies to. It
+    must be set in all :class:`~socon.registry.RegistryConfig` subclasses.
+
+    It must be unique across a Socon project.
+
+.. attribute:: RegistryConfig.label
+
+    Short name for the config, e.g. ``'apollo'``
+
+    This attribute allows relabeling a config when two configs
+    have conflicting labels. It defaults to the last component of ``name``.
+    It should be a valid Python identifier.
+
+    It must be unique across a Socon project.
+
+.. attribute:: RegistryConfig.path
+
+    Filesystem path to the application directory.
+
+    In most cases, Socon can automatically detect and set this, but you can
+    also provide an explicit override as a class attribute on your
+    :class:`~socon.registry.RegistryConfig` subclass. In a few situations this is
+    required; for instance if the config package is a namespace package with
+    multiple paths.
+
+.. attribute:: RegistryConfig.lookup_module_name
+
+    Name of the module Socon will look for the configurations. By default,
+    Socon will look into a :file:`config.py` file at the root of each
+    installed configuration.
+
+Read-only attributes
+--------------------
+
+.. attribute:: RegistryConfig.module
+
+    Root module for the config, e.g. ``<module 'projects.apollo' from
+    'projects/apollo/__init__.py'>``.
+
+.. attribute:: RegistryConfig.registry
+
+    The registry that hold this configuration.
+
+Project configuration
+=====================
+
+.. class:: ProjectConfig
+
+    Project configuration objects store metadata for a project.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: ProjectConfig.settings_module
+
+    Python path to the settings module relative to the project package.
+    By default this attribute is set to ``management.config``.
+
+Read-only attributes
+--------------------
+
+.. attribute:: ProjectConfig.settings
+
+    Project settings object. This follow the same principal as the
+    general ref:'settings <settings-basic>`. You can access your project
+    settings from there, as you would from ``socon.conf.settings``.
+    We believe that setting should be access using the :meth:`~ProjectConfig.get_setting`
+    method as it gives more functionality.
+
+.. attribute:: ProjectConfig.lookup_module_name
+
+    Default to ``projects.py``
+
+Methods
+-------
+
+.. method:: ProjectConfig.get_setting(name: str, default=None, skip=False)
+
+    Return a project settings. This function allow you to
+    pass a default value if not found or raise a :exc:`ValueError`
+
+    The :exc:`ValueError` is raised only if ``skip`` is set to ``False``.
+    Otherwise, ``get_setting()`` will return ``None``
+
+Plugin configuration
+====================
+
+.. class:: PluginConfig
+
+    Plugin configuration objects store metadata for a plugin.
+
+Read-only attributes
+--------------------
+
+.. attribute:: PluginConfig.lookup_module_name
+
+    Default to ``plugins.py``
+
+Base Registry
+=============
+
+.. class:: BaseRegistry
+
+    The base registry provides the following public API. Methods that
+    aren't listed below are considered private and may change without notice.
+
+.. attribute:: registry.ready
+
+    Boolean attribute that is set to ``True`` after the registry is fully
+    populated.
+
+.. method:: registry.get_registry_configs()
+
+    Returns an iterable of :class:`~socon.registry.RegistryConfig` instances.
+
+.. method:: registry.get_registry_config(config_label)
+
+    Returns an :class:`~socon.registry.RegistryConfig` for the config with the
+    given ``config_label``. Raises :exc:`LookupError` if no such config
+    exists.
+
+.. method:: registry.is_installed(config_name)
+
+    Checks whether a config with the given name exists in the registry.
+    ``config_name`` is the full name of the config, e.g. ``'projects.apollo'``.
+
+Project registry
+================
+
+.. class:: ProjectRegistry
+
+    The project registry inherit from the :class:`BaseRegistry`. This makes
+    all the above method accessible by this registry.
+
+.. method:: registry.projects.get_project_config_by_env()
+
+    .. envvar: SOCON_ACTIVE_PROJECT
+
+    Return a project config if the user has set the :envvar:`SOCON_ACTIVE_PROJECT`
+    environment variable.
+
+    Raise a :exc:`LookupError` in case the project does not exist.
+
+Core Registry
+=============
+
+.. class:: CoreRegistry
+
+    Register and initialize all configuration registry.
+
+.. core-registry-read-only-attributes
+
+Read-only attributes
+--------------------
+
+.. attribute:: CoreRegistry.projects
+
+    Config registry that stores all installed projects
+
+.. attribute:: CoreRegistry.plugins
+
+    Config registry that stores all installed plugins
+
+.. attribute:: CoreRegistry.commons
+
+    Config registry that stores the common space config and Socon config.
+
+Initialization process
+======================
+
+How config registries are loaded
+--------------------------------
+
+When Socon starts, the ``registry`` module is loaded and the registry object
+is initialized. When this happen, we create the common registry that store
+the core configuration object and loads all the Socon admin commands.
+
+Then the  :func:`socon.setup()` is responsible for populating the projects,
+plugins and common registry.
+
+.. currentmodule:: socon
+
+.. function:: setup()
+
+    Configure Socon by:
+
+    * Loading the settings.
+    * Setting up the logging.
+    * Initializing the config registries in a specific order:
+        #. Plugins
+        #. Projects
+        #. Common space
+
+.. currentmodule:: socon.core.registry
+
+Each config registry are initialized in two stages, at each stage Socon
+process all plugins and projects in the order of the :setting:`INSTALLED_PLUGINS` and
+:setting:`INSTALLED_PROJECTS` respectively. We will take the installation
+of projects as an example as it would be the same for plugins.
+
+#. First Socon imports each items in :setting:`INSTALLED_PROJECTS`
+
+   If it's a project configuration class, Socon imports the root package
+   of the project, defined by its :attr:`~PluginConfig.name` attribute. If
+   it's a Python package, Socon looks for a project configuration in an
+   ``projects.py`` submodule, or else creates a default project configuration.
+
+   For a plugin, Socon would look for a plugin configuration in a
+   ``plugins.py`` submodule.
+
+   For projects, we know that there is a :setting:`SKIP_ERROR_ON_PROJECTS_IMPORT`
+   available in the settings. By default this setting is set to ``True``. This
+   mean that even if there is an import error, Socon will continue to register
+   every projects. You will see the error only when loading the project config
+   itself. If you want to raise an error, set this setting to ``False``.
+
+   Once this stage completes, APIs that operate on project configurations
+   such as :meth:`~registry.get_registry_config()` become usable. In our
+   case it would be :meth:`registry.projects.get_registry_config()`.
+
+#. Then Socon attempts to import the ``managers`` submodule of each projects
+   and plugins. This will trigger the import of all commands that are located
+   in every config registered (plugins, projects and the common space).

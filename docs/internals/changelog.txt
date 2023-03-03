@@ -1,0 +1,22 @@
+=========
+Changelog
+=========
+
+Versions follow `Semantic Versioning <https://semver.org/>`_ (``<major>.<minor>.<patch>``).
+
+Right now Socon is at it's premise. For that reason, there might be backward
+incompatibility between two minors. If that is the case we will
+still notice in the **Deprecations** section of the releases.
+
+Later on, backward incompatibility (breaking) changes will only be
+introduced in major versions with advance notice in the **Deprecations**
+section of releases.
+
+.. note::
+
+    You can retrieve all deprecations :doc:`here </internals/deprecations>`
+
+Socon 0.1.0
+===========
+
+* First release of ``socon``

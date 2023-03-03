@@ -1,0 +1,9 @@
+# Text file example
+
+# We can delete this line
+# We can append after this line
+# We can append before this line
+# We can replace this line
+
+Here is a template where we want to render a variable from the code
+# Here is my variable: I'm foo variable

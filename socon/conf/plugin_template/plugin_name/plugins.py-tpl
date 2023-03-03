@@ -1,0 +1,5 @@
+from socon.core.registry.config import PluginConfig
+
+
+class {{ camel_case_plugin_name }}Config(PluginConfig):
+    name = '{{ plugin_name }}'

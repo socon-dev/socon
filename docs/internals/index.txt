@@ -1,0 +1,15 @@
+===============
+Socon internals
+===============
+
+This is the place to be if you would like to help develop Socon and learn
+more about how Socon is managed.
+
+.. toctree::
+   :maxdepth: 2
+
+   contributing
+   coding-style
+   release-process
+   deprecations
+   changelog

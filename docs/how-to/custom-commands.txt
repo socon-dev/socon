@@ -1,0 +1,370 @@
+===============
+Custom commands
+===============
+
+The command management module allows you to extend the functionality of your
+framework by adding commands that are common to all your projects or unique
+to one. Socon integrates two kind of commands:
+
+* :class:`~socon.core.management.BaseCommand` that we call general command.
+  These commands are considered global as they don't require to load a
+  :class:`~socon.core.registry.ProjectConfig`. They are essentially used to execute
+  general tasks that are not project related.
+
+* :class:`~socon.core.management.ProjectCommand` inherit from
+  :class:`~socon.core.management.BaseCommand`. These commands require a project
+  configuration to work. For this command to work you will need to specify the
+  :option:`--project` option.
+
+Register your commands
+======================
+
+To register a command in your framework you simply need to add a ``management/commands``
+directory in one of your projects or in the :ref:`common space <common-space>`. Socon
+will register every command in each module in that directory::
+
+    myframework/
+        myframework/
+            __init__.py
+            management/
+                __init__.py
+                settings.py
+                commands/
+                    __init__.py
+                    launch.py
+                    publish.py
+        projects/
+            __init__.py
+            apollo/
+                __init__.py
+                projects.py
+                management/
+                    __init__.py
+                    commands/
+                        __init__.py
+                        launch.py
+                    config.py
+            artemis/
+                __init__.py
+                projects.py
+        manage.py
+
+In this example, we have created multiple modules in both the ``common space``
+and in the ``apollo`` project under the ``management/commands`` directory.
+In each of these modules there is a class that describe the command that we want
+to register in the ``manage.py``. Each of these commands inherit from either
+the :class:`~socon.core.management.BaseCommand` or the
+:class:`~socon.core.management.ProjectCommand`.
+
+Project command
+===============
+
+Let's take a close look at the :file:`launch.py` module that is defined in
+the common space. The ``launch`` command defined in that module will be a
+:class:`~socon.core.management.ProjectCommand` command and will be made available for
+any project in your framework.
+
+.. important::
+
+    Because the command is declared as a :class:`~socon.core.management.ProjectCommand`
+    and in the ``common space``, it is available for any project that exist or that
+    will be created.
+
+.. code-block:: python
+
+    from socon.core.management.base import ProjectCommand, Config
+    from socon.core.registry.base import ProjectConfig
+
+
+    class LaunchCommand(ProjectCommand):
+        name = 'launch'
+
+        def handle(self, config: Config, project_config: ProjectConfig):
+            spacecraft = project_config.get_setting('SPACECRAFT')
+            print(f'Launching the {spacecraft} SpaceCraft to the moon')
+
+The ``launch`` command being a :class:`~socon.core.management.ProjectCommand`,
+it must be called using the :option:`--project` option, because
+:class:`~socon.core.management.ProjectCommand` must load a project configuration
+to work:
+
+.. code-block: console
+
+    python manage.py launch --project artemis
+
+If we execute this command, and if we define the SPACECRAFT
+:ref:`project setting <project-setting-file>` as ``Saturn IB`` it will output::
+
+    Launching the Saturn IB SpaceCraft to the moon
+
+:class:`~socon.core.management.ProjectCommand` is really powerful and allows you
+to make generic commands for each of your projects if it's well defined.
+
+Overriding project commands
+---------------------------
+
+Commands are based on :doc:`managers and hooks </ref/manager>`. Socon registers
+the built-in commands and then searches for commands in Socon,
+the :setting:`INSTALLED_PLUGINS`, the common space, and finally the
+:setting:`INSTALLED_PROJECTS`.
+
+During the search, each command are registered in the :class:`CommandManager`
+and saved alongside it's config object. When Socon looks for a command it will
+proceed as follows:
+
+    #. Search in Socon config for built-in commands.
+        If the command is found save it.
+
+    #. Search in the plugins.
+        If the command is found, override the previous command.
+
+    #. Search in the common space config for commands.
+        If the command is found, override the previous command.
+
+    #. Did the user pass the :option:`--project`?
+        Yes, if the command is found in the project, it overrides the previous command.
+        No, return the last command found
+
+To override a command, the new command must have the same name.
+Let's take an example to illustrate what we just said. In the above tree structure,
+we have created a ``apollo`` project that defines a ``launch.py``
+module as well. Let's take a look at what is inside:
+
+.. code-block:: python
+
+    from socon.core.management.base import ProjectCommand, Config
+    from myframework.management.commands.launch import LaunchCommand
+
+
+    class LaunchCommand(LaunchCommand):
+        name = 'launch'
+
+        def handle(self, config: Config, project_config: ProjectConfig):
+            spacecraft = project_config.get_setting('SPACECRAFT')
+            self.prepare(spacecraft)
+            super().handle(config, project_config)
+
+        def prepare(self, spacecraft):
+            print(f"Specific things to do for the launch of {spacecraft}")
+
+As you can notice, the command has the same name as the one we
+declared earlier. It also inherits from the one in the common space. This command
+will do the exact same thing as the previous, one but it will add a new function
+that will prepare the spacecraft before being launched.
+We also need to specify the ``SPACECRAFT`` variable in the apollo project
+config. For this example, we will define it as ``Orion``.
+
+If we start the command, with:
+
+.. code-block:: console
+
+    python manage.py launch --project apollo
+
+We would have the following output::
+
+    Specific things to do for the launch of Orion
+    Launching the Orion SpaceCraft to the moon
+
+.. important::
+
+    This overrides only the ``launch`` command of the apollo project (as it's
+    the only one that redefines it). If we start the same command but with
+    the ``artemis`` project, we would get the result previously shown.
+
+Management commands from plugin that have been unintentionally
+overridden can be made available under a new name by creating a new command in
+one of your projects or in the common space.
+
+Limiting scope
+--------------
+
+You can limit the access to a :class:`~socon.core.management.ProjectCommand` by using the
+:attr:`~socon.core.management.ProjectCommand.projects` attribute. Using this attribute,
+you restrict the access to this command.
+
+.. code-block:: python
+
+    from socon.core.management.base import ProjectCommand
+
+
+    class SimpleCommand(ProjectCommand):
+        name = 'simple_command'
+
+        # limit the scrope to 2 projects
+        projects = ['apollo', 'artemis']
+
+        def handle(...):
+            # ...
+
+General commands
+================
+
+Let's take a closer look at the :file:`publish.py` module that is defined in
+the common space. The ``publish`` command defined in that module
+will be a :class:`~socon.core.management.BaseCommand` command and will be made
+available as a general command (as we like to call it).
+
+..note::
+
+    This kind of command can also be declared in projects even if it does not
+    make a lot of sense. It's important to mention that even if you do declare
+    this command in a project, it will still be shown as as general command and
+    will not be binded to the project.
+
+.. code-block:: python
+
+    from socon.core.management.base import BaseCommand, Config
+
+
+    class PublishCommand(BaseCommand):
+        name = 'publish'
+
+        def handle(self, config: Config):
+            print(f'Publishing an article about NASA')
+
+That is it, pretty simple! We use the :class:`~socon.core.management.BaseCommand`
+class and we give it a name. Then, this command will be available in the ``manage.py``.
+
+Running the command:
+
+.. code-block:: python
+
+    python manage.py publish
+
+Would give as you all guessed::
+
+    Publishing an article about NASA
+
+Overriding general commands
+---------------------------
+
+General command acts the same as project command. This means that you can
+override a general command in the common space, a plugin or a project.
+
+If you create a general command in a project with the same name as one
+in the common space for example, you can use it by calling your command with
+the :option:`--project` option. If the command exist it will be executed,
+otherwise an error will be thrown as Socon expects the command to exist in the project.
+There is no fallback.
+
+You can ask yourself, why you would override a general command? Let's take
+an example where you want to redefine the built-in ``createproject`` in your
+framework because you want to improve it. You just have to create the
+``createproject`` command inside the common space and it will be used instead of
+the general command the next time you call it.
+
+Accepting optional arguments
+============================
+
+All commands can be easily modified by accepting additional command line options.
+These custom  options can be added in the
+:meth:`~socon.core.management.BaseCommand.add_arguments` method like this:
+
+.. code-block::
+
+    class LaunchCommand(ProjectCommand):
+        name = 'launch'
+
+        def add_arguments(self, parser: ArgumentParser) -> None:
+            parser.add_argument('--countdown', help=(
+                "Countdown before we launch the rocket"
+            ), default=0)
+
+        def handle(self, config: Config, project_config: ProjectConfig):
+            spacecraft = project_config.get_setting('SPACECRAFT')
+            countdown = config.getoption('countdown')
+            for i in range(int(countdown), 0, -1):
+                print(i)
+                sleep(1)
+            print(f'Launching the {spacecraft} SpaceCraft to the moon')
+
+As you can see in this example, we have extended the functionality of our
+command by adding a countdown before launching our spacecraft.
+
+We can now call this command:
+
+.. code-block:: console
+
+    python manage.py launch --countdown 60 --project apollo
+
+The ``countdown`` option in our example is available in the config argument
+of the handle method. This object, stores all the options that was passed
+to the command. There are two ways to access these options:
+
+#. Access to command line options using
+   :attr:`config.options <socon.core.management.Config.options>`.
+
+#. Access the option using the :meth:`~socon.core.management.Config.getoption` method.
+   This method offers more possibilities than just using the
+   :attr:`config.options <socon.core.management.Config.options>` method.
+
+In addition to being able to add custom command line options, all
+:doc:`management commands</ref/socon-admin>` can accept some default options
+such as :option:`--verbosity` and :option:`--settings`.
+
+Abstract command
+================
+
+The term ``abstract`` means that the command you will define will not
+be registered and available in the ``manage.py``. It is useful when
+you want to make a command as an interface for other commands.
+
+Let's take an example on how to make an ``abstract`` command and how it
+can be used. Let's take the ``publish`` command that we used in this document
+and make it abstract.
+
+.. code-block:: python
+
+    from socon.core.management.base import BaseCommand, Config
+
+
+    class BasePublishCommand(BaseCommand, abstract=True):
+
+        def handle(self, config: Config):
+            self.create_article()
+            print(f'Publishing an article about NASA')
+
+        def create_article(self):
+            raise NotImplementedError(
+                "Subclass of must implement the create_article() method"
+            )
+
+
+    class PublishCommand(BasePublishCommand):
+        name = 'publish'
+
+        def create_article(self):
+            print("Are we alone in the universe?")
+
+This example shows a :class:`BasePublishCommand` that is declared as ``abstract``.
+This means that it won't be seen in the ``manage.py``. Only the subclassed
+command will be seen.
+
+Complementary information
+=========================
+
+Multiple commands
+-----------------
+
+Multiple commands can be declared in one module. Socon will search for any
+subclass of :class:`~socon.core.management.BaseCommand` and
+:class:`~socon.core.management.ProjectCommand` that are not abstract. This will
+give you the choice to organize your project as you wish.
+
+Command name
+------------
+
+As you might have seen, we always specified the name of a command using the
+:attr:`~socon.core.management.BaseCommand.name` attribute. This is not mandatory, by default
+Socon will take the name of your command class in lowercase. If the name
+of the class contains the word ``Command`` at the end of it like ``PublishCommand``.
+The name will be stripped out and the final name will be ``publish``.
+
+Keep extra args
+----------------
+
+Sometimes it is useful to pass extra arguments to another script. Socon will
+allow you to do that by setting the
+:attr:`~socon.core.management.BaseCommand.keep_extras_args` to ``True``.
+This way you can access all the extra arguments through
+:attr:`~socon.core.management.Config.extras_args`.

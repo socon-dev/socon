@@ -1,0 +1,58 @@
+==============
+Socon Overview
+==============
+
+Why Socon?
+==========
+
+The idea behind the framework is to help people and/or organizations to develop
+their own fast and reliable framework for their different projects. We often
+spend too much time creating scripts for a single project. Or spend too much time
+trying to create generic scripts for several projects. Usually, this ends up
+in hundreds of scripts and is very time-consuming.
+
+Socon has been designed to simplify all that. Socon works with commands.
+Socon will let you define common commands that can be shared across projects.
+Each project can either write their own commands, or override a common command
+to change its behavior by adding or removing functionalities.
+
+Socon will also let you develop your own managers and hooks to empower your framework.
+You are also free to develop your own plugins to share across your company,
+with friends or with the world.
+
+For who?
+========
+
+For people or organizations who need to develop common scripts for different
+projects that share common or specific configurations.
+
+How is Socon licensed?
+=======================
+
+Socon is distributed under the `3-clause BSD license`. This is an open source
+license granting broad permissions to modify and redistribute Socon.
+
+Why does Socon include Django and Pytest license files?
+-------------------------------------------------------
+
+Django
+~~~~~~
+
+I have worked quite a bit with `Django`_. I really liked the way they designed
+the command module. The fact that you can define your own command for an
+application is really interesting. I also liked the way they are registering
+model, application configuration and general settings. This inspired
+me to start creating Socon.
+
+In Socon, I've modified a lot of their work which is why it might not be
+recognizable. But as the saying goes, one must give to Caesar what is Caesar's'.
+
+Pytest
+~~~~~~
+
+I also had the chance to work a lot with `Pytest`_. I really liked the way
+they were interacting with the terminal. So the ``socon.utils.terminal`` module is
+mostly their work, I've only added a couple of functions.
+
+.. _Django: https://www.djangoproject.com/
+.. _Pytest: https://docs.pytest.org/en/7.2.x/

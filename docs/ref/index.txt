@@ -1,0 +1,20 @@
+===============
+Socon reference
+===============
+
+This is the place to be if you would like to help develop Socon and learn
+more about the mechanics of this framework.
+
+.. toctree::
+   :maxdepth: 1
+
+   socon-admin
+   settings
+   list-of-settings
+   registry
+   manager
+   commands
+   logging
+   terminal
+   exceptions
+   utils

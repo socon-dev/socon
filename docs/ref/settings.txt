@@ -1,0 +1,167 @@
+========
+Settings
+========
+
+.. contents::
+    :local:
+    :depth: 1
+
+.. note::
+
+    In Socon, the settings module has been inspired by Django settings module.
+    A lot of it has been re-written but some part and some principal remains
+    the same. This document, will mirror a part of their settings documentation.
+
+A Socon settings file contains all the configuration of your Socon
+installation. This document explains how settings work and which settings are
+available by default. Settings are also available for projects, and will
+be covered in this document as well.
+
+.. _settings-basic:
+
+The basics
+==========
+
+A settings file is just a Python module with module-level variables.
+
+Here are a couple of example settings:
+
+.. code-block:: python
+
+    INSTALLED_PROJECTS = ['projects.apollo']
+    LOGGING = {}
+
+Because a settings file is a Python module, the following apply:
+
+* It doesn't allow for Python syntax errors.
+* It can assign settings dynamically using normal Python syntax.
+  For example::
+
+      MY_SETTING = [str(i) for i in range(30)]
+
+* It can import values from other settings files.
+
+Designating the settings
+========================
+
+.. envvar:: SOCON_SETTINGS_MODULE
+
+When you use Socon, you have to specify which settings you're currently using.
+Do this by using an environment variable, :envvar:`SOCON_SETTINGS_MODULE`.
+
+The value of :envvar:`SOCON_SETTINGS_MODULE` should be in Python path syntax,
+e.g. ``mysite.settings``. Note that the settings module should be on the
+Python `import search path`_.
+
+.. note::
+
+    By default the :file:`manage.py` set this environment variable for
+    you. You can check this by opening the file in your container.
+
+.. _import search path: https://realpython.com/lessons/module-search-path/
+
+Default settings
+================
+
+A Socon settings file doesn't have to define any settings if it doesn't need
+to. Each setting has a sensible default value. These defaults live in the
+module :file:`socon/conf/global_settings.py`.
+
+Here's the algorithm Socon uses in compiling settings:
+
+* Load settings from ``global_settings.py``.
+* Load settings from the specified settings file, overriding the global
+  settings as necessary.
+
+Note that a settings file should *not* import from ``global_settings``, because
+that's redundant.
+
+Using settings in Python code
+=============================
+
+In your Socon projects, use settings by importing the object
+``socon.conf.settings``. Example::
+
+    from socon.conf import settings
+
+    if settings.MY_VARIABLE:
+        # Do something
+
+.. warning::
+
+    ``socon.conf.settings`` isn't a module -- it's an object. So
+    importing individual settings is not possible::
+
+        from socon.conf.settings import MY_VARIABLE  # This won't work.
+
+Also note that your code should *not* import from either ``global_settings`` or
+your own settings file. ``socon.conf.settings`` abstracts the concepts of
+default settings and site-specific settings; it presents a single interface.
+It also decouples the code that uses settings from the location of your
+settings.
+
+Altering settings at runtime
+============================
+
+You shouldn't alter settings in your applications at runtime. For example,
+don't do this::
+
+    from socon.conf import settings
+
+    settings.MY_VARIABLE = XXXX   # Don't do this!
+
+The only place you should assign to settings is in a settings file.
+
+Available settings
+==================
+
+For a full list of available settings, see the :doc:`settings reference </ref/list-of-settings>`.
+
+Projects settings
+=================
+
+Each project can define it's own settings that will be loaded at the start
+of the program. Project settings respect the :ref:`basics <settings-basic>` of
+settings.
+
+When you create your project, Socon create a :file:`config.py` file at the
+root of your project inside the ``management`` folder.
+This file is where you will define all your project related settings. By default
+we don't load any settings as these settings are proper to your project.
+
+Modify the path of my project settings
+--------------------------------------
+
+Socon provide a way to modify the path to your project settings file. If you
+don't like the default path, you can modify the :attr:`ProjectConfig.settings_module` in your
+project :class:`ProjectConfig` class:
+
+.. code-block:: python
+    :caption: projects/myproject/projects.py
+
+    class MyProject(ProjectConfig):
+        name = 'projects.myproject'
+        settings_module = 'other_module.settings`
+
+.. warning::
+
+    The settings path should be in Python path syntax.
+
+Access project settings
+-----------------------
+
+To access a project settings your first need to access to a project
+config. There are two ways to access one:
+
+* Running a project command. The :meth:`BaseCommand.handle` method expose a project
+  config parameter. This config is the one loaded with the :option:`--project`
+  option.
+
+* Accessing a project config using Socon config :doc:`registry </ref/registry>`.
+
+When you have your hand on a project config you can use the
+:meth:`get_setting <socon.core.registry.ProjectConfig.get_setting>` method:
+
+.. code-block:: python
+
+    my_project_config.get_setting('MY_VARIABLE')

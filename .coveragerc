@@ -1,0 +1,11 @@
+[run]
+branch = True
+omit = tests/*
+
+[html]
+title = Socon coverage report
+directory = coverage
+
+[report]
+exclude_lines =
+    if TYPE_CHECKING:

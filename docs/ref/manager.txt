@@ -1,0 +1,131 @@
+=======
+Manager
+=======
+
+.. module:: socon.core.manager
+
+This document references the base class for managers and hooks. For information
+on how to use them and how to write your own managers and hooks,
+see :doc:`custom managers and hooks </how-to/custom-managers-and-hooks>`.
+You can also find a tutorial about managers and hooks :doc:`here </intro/tutorials/2_change_behavior>`.
+
+Manager objects
+===============
+
+.. class:: BaseManager
+
+    The base class from which all managers will derive from.
+
+    By subclassing your class from the BaseManager and by explicitly
+    placing your class into `managers.py` in a plugin, project or in the common
+    config will auto-register the class as a manager.
+
+    When a manager is defined, it requires to be hooked to :class:`Hook` subclass.
+    If you try to access a hook from a manager that does not contain any hooks,
+    Socon will raise a :exc:`~socon.core.exceptions.ManagerNotHooked` exception.
+
+Read-only attributes
+--------------------
+
+.. attribute:: BaseManager.hooks
+
+    A dictionary of all hooks registered by registry name and config
+    registry label.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: BaseManager.name
+
+    Name of the manager. This class attribute is mandatory.
+
+.. attribute:: BaseManager.lookup_module
+
+    Name of the module the manager will into to import hooks.
+
+Class methods
+-------------
+
+.. method:: BaseManager.get_manager(name: str)
+
+    Return the manager with the given name or raise a
+    :exc:`socon.core.exceptions.ManagerNotFound` exception
+
+.. method:: BaseManager.get_managers()
+
+    Return all registered managers.
+
+Methods
+-------
+
+.. method:: BaseManager.get_modules(config: Type[:class:`RegistryConfig`])
+
+    Return a list of modules to be imported by the manager. It's
+    in that list that all the hooks of this manager must be define.
+
+.. method:: BaseManager.find_all()
+
+    Look into each installed registry config for hooks. This method
+    import all modules returned by :meth:`BaseManager.get_modules`. When
+    a module is imported, it auto-register every hook in that module.
+
+.. method:: BaseManager.find_hooks_impl(config: Type[:class:`RegistryConfig`])
+
+    Look into a specific registry config for hooks. This method import all
+    modules return by :meth:`BaseManager.get_modules` for that specific config.
+
+.. method:: BaseManager.get_hook(config: Type[:class:`RegistryConfig`], name: str)
+
+    Return a hook for a specific registry config. If the hook is not found, the
+    method will return ``None``.
+
+.. method:: BaseManager.get_hooks(config: Type[:class:`RegistryConfig`])
+
+    Find all hooks associated to a registry config. This method returns
+    an empty list or a list of hooks.
+
+.. method:: BaseManager.get_hook_config_holders(name: str)
+
+    Return a list of registry config :attr:`~RegistryConfig.label` that
+    hold a specific hook.
+
+.. method:: BaseManager.search_hook_impl(name, config: Type[:class:`RegistryConfig`]=None)
+
+    Search for a hook globally or for a specific registry config. The search
+    is done following a specific order:
+
+        #. Did the user pass a config object?
+            Yes, search the hook for that config. It is found return it
+            else continue.
+
+        #. Search in the common space config for hooks.
+            If it's found return it else continue.
+
+        #. Search in the plugins.
+            If it's found return it else continue.
+
+        #. Search in built-in Socon hooks.
+            if it's found return it else continue.
+
+        #. Raise :exc:`socon.core.exceptions.HookNotFound`.
+
+.. method:: BaseManager.get_hooks_name()
+
+    Return a list of all registered hooks name
+
+Hooks objects
+=============
+
+.. class:: Hook
+
+    The base class from which all hooks will derive from. Every
+    class that derive from this class, must define a manager.
+
+Configurable attributes
+-----------------------
+
+.. attribute:: Hook.manager
+
+    The manager the hook class will be linked to. If this attribute
+    is ``None`` when being registered, Socon will raise an
+    :exc:`~socon.core.exceptions.ImproperlyConfigured` exception.

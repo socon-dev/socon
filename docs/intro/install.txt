@@ -1,0 +1,87 @@
+========================
+Quick installation guide
+========================
+
+Welcome to the installation guide. Before you can use Socon you will
+need to install it on your computer. Be sure to check if you have python
+installed with the correct version which should be ``>= 3.9``.
+
+Install Python
+==============
+
+Get the latest version of Python at https://www.python.org/downloads/ or with
+your operating system's package manager.
+
+You can verify that Python is installed by typing ``python`` from your shell;
+you should see something like::
+
+    Python 3.x.y
+    ...
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>>
+
+Install Socon
+=============
+
+Installing an official release
+------------------------------
+
+You can install an official release using ``pip``. Pip is the package manager
+of python. It is used to install/update packages in your environment.
+
+.. note::
+
+   Using ``pip`` is the recommended way to install Socon.
+
+#. Install `pip`_. Pip Usually comes with python and you can check it is
+   already installed by typing ``python -m pip --version``. If you get
+   an error, you can install it using the `standalone pip installer`_.
+
+#. Create a virtual environment. You can get more information :doc:`here </intro/environment>`.
+   For a quick reminder, a virtual environment provides isolated Python environments,
+   which are more practical than installing packages systemwide.
+
+#. After you created your virtual environment, enter the command:
+
+   .. code-block:: console
+
+      $ python -m pip install socon
+
+.. _pip: https://pip.pypa.io/
+.. _standalone pip installer: https://pip.pypa.io/en/latest/installation/
+
+Installing the development version
+----------------------------------
+
+Before installing the development version you need to check that you have `Git`_
+installed and that you can run its commands from a shell.
+(Enter ``git help`` at a shell prompt to test this.)
+
+#. Clone Socon like so:
+
+   .. code-block:: console
+
+      $ git clone https://github.com/socon-dev/socon.git
+
+   This will create a directory ``socon`` in your current directory.
+
+#. Make sure to install Socon in a virtual environment. It's not
+   mandatory but it will keep your system environment clean. If you don't know
+   how to do this, read: :doc:`Development environment </intro/environment>`
+
+#. After setting up and activating the virtual environment, ``cd`` into the socon
+   directory and:
+
+   .. code-block:: console
+
+      $ python -m pip install -e .
+
+.. note::
+
+   ``pip install -e``, install a project in editable mode (i.e. setuptools "develop mode")
+   from a local project path or a VCS url.
+
+Run ``git pull`` when you want to update your code. This command will fetch
+and update your code with the latest changes.
+
+.. _Git: https://git-scm.com/

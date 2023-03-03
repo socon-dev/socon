@@ -1,0 +1,12 @@
+=============
+How-to guides
+=============
+
+Core socon functionality
+-------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   custom-commands
+   custom-managers-and-hooks

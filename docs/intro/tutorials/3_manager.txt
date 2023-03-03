@@ -1,0 +1,220 @@
+=======================
+Create your own manager
+=======================
+
+Managers will help you expand your framework rapidly across all
+your different projects. If you have read the latest
+:doc:`tutorial </intro/tutorials/2_change_behavior>` you already know that commands
+are hooks of the :class:`CommandManager` class.
+class. So what is exactly is a hook and a manager?
+
+We will describe that here in a simple manner.
+You can find more information in the :doc:`manager </ref/manager>` reference doc.
+
+Managers & Hooks
+================
+
+Managers
+--------
+
+Managers help you define a way to search and register hooks (class or function)
+linked to a specific registry config like a :class:`~socon.core.registry.ProjectConfig`.
+
+During the first tutorials you have encountered and worked with different registry
+config without noticing it. The :class:`~socon.core.registry.ProjectConfig` being one.
+Each registry, have hooks that are registered to every config.
+When you create a new command, automatically, when Socon start, we know that
+the project ``artemis`` has a ``launch`` command that is linked to the
+:class:`CommandManager`.
+
+Hooks
+-----
+
+Hooks are nothing less than a class that is linked to a manager to do
+anything you want. As an example :class:`~socon.core.management.BaseCommand` and
+:class:`~socon.core.management.ProjectCommand` inherit from
+:class:`Hook <socon.core.manager.Hook>` and define how a command works.
+Both of these class are linked to the :class:`CommandManager` that define
+the way we find these commands and the way we print the helper when you
+type ``python manage.py help``.
+
+Create a Manager
+================
+
+As it is always better to learn with a good example, let's create a manager
+that help you register all your spacecraft for your projects. Well of course
+in each project you could just create a simple json that you load using
+your :class:`ProjectConfig` path etc.. but where is the fun in that? And wouldn't it
+be better to have a class for each spacecraft with different functionalities and different
+attributes that you can register automatically? I knew it. Let's do it.
+
+Define the manager
+------------------
+
+First thing first, we need to create the manager. For that in any project or in
+the common space you can create a ``managers.py`` file. It's in that file
+that you will define all your managers. At the start, Socon will scan this file
+if it exists and register all the managers that have been defined.
+
+We are going to create our manager in the common space. For that create
+the file :file:`managers.py` in ``tutorial``::
+
+    tutorial/
+        tutorial/
+            __init__.py
+            settings.py
+            managers.py
+        ...
+
+In the :file:`managers.py`:
+
+.. code-block:: python
+
+    from socon.core.manager import BaseManager
+
+
+    class SpaceCraftManager(BaseManager):
+        name = 'spacecraft'
+        lookup_module = 'spacecraft'
+
+That simple? Yes, by default Socon just needs two attributes:
+
+* :attr:`name`: The name of the manager.
+
+* :attr:`lookup_module`: The name of the module to look for the hooks.
+
+Right now, there is nothing much. Socon will register your manager but we
+don't know yet what to do with it. To give it a purpose we will create
+a :class:`Hook` class that we will link to this manager. Then all of our hooks
+will inherit from this one.
+
+Let's create the hook. We have specified in the manager that we should
+look in the ``spacecraft`` module to find the hooks. So let's create
+a file :file:`spacecraft.py` at the same place than the :file:`managers.py`.
+
+In :file:`spacecraft.py`:
+
+.. code-block:: python
+
+    from socon.core.manager import Hook
+
+
+    class SpaceCraft(Hook, abstract=True):
+        manager = 'spacecraft'
+
+        # attribute of the spacecraft
+        name = None
+        speed = None
+        size = None
+
+        def __str__(self) -> str:
+            return "name: {}, speed: {}, size {}".format(
+                self.name, self.speed, self.size
+            )
+
+In this class we have defined two important things:
+
+* :attr:`abstract`: This mean that this hook won't be registered. In most case we
+  won't need to register the main hook class. This is because it can
+  be an abstract base class and we don't want to see it as a manager.
+
+* :attr:`manager`: The name of the manager that this hook and all it's subclass will be linked to.
+  This is really important. If you forget that and you register your hooks,
+  this will throw you an error. Every class that inherit from :class:`Hook` must
+  define the :attr:`manager` attribute.
+
+.. note::
+
+    We could have register this hook in the :file:`managers.py` module. It would
+    have worked. This is something that you have to decide for your
+    framework.
+
+Now what? We need to create our aircraft in each of our projects. For
+that let's copy the :file:`spacecraft.py` file in both ``apollo`` and ``artemis`` project.
+We will make a slight change in both of them.
+
+Apollo project - :file:`spacecraft.py`:
+
+.. code-block:: python
+
+    from tutorial.spacecraft import SpaceCraft
+
+
+    class SaturnIb(SpaceCraft):
+        name = 'Saturn IB'
+        speed = 10000
+        size = 25
+
+Artemis project - :file:`spacecraft.py`:
+
+.. code-block:: python
+
+    from tutorial.spacecraft import SpaceCraft
+
+
+    class Orion(SpaceCraft):
+        name = 'Orion'
+        speed = 20000
+        size = 10
+
+To access these class we need to call our manager and tell him to look
+for every hooks in ``spacecraft.py`` in the common space and in every projects.
+For that we will modify the :file:`build.py` command in the common space.
+
+.. code-block:: python
+
+    from socon.core.management.base import Config, ProjectCommand
+    from socon.core.registry.base import ProjectConfig
+    from socon.core.manager.base import BaseManager
+
+
+    class BuildCommand(ProjectCommand):
+        name = 'build'
+
+        def handle(self, config: Config, project_config: ProjectConfig):
+            manager = BaseManager.get_manager('spacecraft')
+            manager.find_all()
+            spacecrafts = manager.get_hooks(project_config)
+            for spacecraft in spacecrafts:
+                print(f"Building {spacecraft()}")
+
+This get's a bit more complicated but no worries we will explain everything.
+First off all, we will need the :class:`~socon.core.manager.BaseManager` class
+to get access to all the managers. It's that class that keeps a record of all
+managers Socon or the user have declared.
+
+* :meth:`~socon.core.manager.get_manager`: To access this manager we will use
+  the :meth:`~socon.core.manager.get_manager` method by specifying the name of
+  the manager we are looking for. This will return our manager and give us access to
+  methods that will help us get all of our :class:`SpaceCraft` class.
+
+* :meth:`~socon.core.manager.find_all`: Socon allows you to search only in the
+  project config you want but also everywhere in your framework. For the tutorial
+  we will search everywhere.
+
+* :meth:`~socon.core.manager.BaseManager.get_hooks`: Get all the hooks for the project config given.
+  This means  that when you start the build command, if the project you give contain
+  a spacecraft, we will get it and print it later on.
+
+We then iterate and instantiate our spacecrafts. This will then
+allow us to print the string representation of our class.
+
+You can now start the ``build`` command:
+
+.. code-block:: console
+
+    $ python manage.py build --project artemis
+
+This will get you the following output:
+
+.. code-block:: console
+
+    Building name: Orion, speed: 20000, size 10
+
+Congratulations! You have built your first Manager and Hooks. As you can see
+it is pretty easy and give you endless possibility for your framework.
+
+.. note::
+
+    You can add multiple spacecraft in your :file:`spacecraft.py`. They will all
+    be registered and accessible using your manager. Give it a try!

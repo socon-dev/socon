@@ -1,0 +1,42 @@
+=======
+Logging
+=======
+
+.. module:: socon.utils.log
+   :synopsis: Logging tools for Socon projects and plugins
+
+Socon does not use logging internally but we know that people do. This is why
+we have added an easy way to define your logging configuration in the
+:file:`settings.py` file.
+
+Custom logging configuration
+============================
+
+If you don't want to use Python's dictConfig format to configure your
+logger, you can specify your own configuration scheme.
+
+The :setting:`LOGGING_CONFIG` setting defines the callable that will
+be used to configure Socon's loggers. By default, it points at
+Python's :func:`logging.config.dictConfig` function. However, if you want to
+use a different configuration process, you can use any other callable
+that takes a single argument. The contents of :setting:`LOGGING` will
+be provided as the value of that argument when logging is configured.
+
+Disabling logging configuration
+===============================
+
+If you don't want to configure logging at all (or you want to manually
+configure logging using your own approach), you can set
+:setting:`LOGGING_CONFIG` to ``None``. Here's an example that disables Socon's
+logging configuration and then manually configures logging:
+
+.. code-block:: python
+    :caption: settings.py
+
+    LOGGING_CONFIG = None
+
+    import logging.config
+    logging.config.dictConfig(...)
+
+Setting :setting:`LOGGING_CONFIG` to ``None`` only means that the automatic
+configuration process is disabled, not logging itself.

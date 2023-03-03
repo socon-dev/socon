@@ -1,0 +1,96 @@
+===========
+Socon utils
+===========
+
+.. module:: socon.utils
+   :synopsis: Socon's built-in utilities.
+
+This document covers all modules in ``socon.utils``. Most of the
+modules in ``socon.utils`` are designed for internal use but we believe
+that it can be useful as well for your framework.
+
+``socon.utils.func``
+====================
+
+.. module:: socon.utils.func
+    :synopsis: General built-in functions
+
+.. function:: get_object_attr
+
+    Return a value from any object attribute. This function allows you to
+    pass a default value if not found or raise a ValueError.
+
+``socon.utils.reshape``
+=======================
+
+.. module:: socon.utils.reshape
+
+.. class:: FileReshape
+
+    Base class to modify the content of a file.
+
+Read-only attributes
+--------------------
+
+.. attribute:: FileReshape.content
+
+    The content of the file given at the instance creation.
+
+Methods
+-------
+
+.. method:: FileReshape.__init__(filepath: Union[str, PathLike])
+
+    When you create :class:`FileReshape` instance, you need to give
+    the path to the file you want to work with. The file is
+    then read and the content is saved in :attr:`FileReshape.content`.
+
+.. method:: FileReshape.revert_modif()
+
+    Revert the modification applied to the content of the file. Really
+    useful when you have modified the content of a file for a moment
+    but you want to get back to the original quickly after.
+
+.. method:: FileReshape.write(content: str = None, dest: Union[str, Path] = None, **kwargs)
+
+    Write content to the current file or to a another file using the ``dest``
+    parameter. Also, this method will allow to pass any parameters to the open
+    function. If you don't pass any content to the method, :class:`FileReshape`
+    will use the :attr:`FileReshape.content` of the current instance.
+
+.. method:: FileReshape.replace(pattern: str, replace: str, **kwargs)
+
+    Replace any string that match the pattern in the file. The method
+    use ``re.sub`` for replacing the string. You can pass any argument
+    to this function using the ``kwargs`` argument.
+
+.. method:: FileReshape.read_file()
+
+    Read the content of the file.
+
+.. method:: FileReshape.render(context: dict)
+
+    Render a specific template with tags like {{ name }}. This
+    works like ``jinja``. You can pass a dictionary of name and value to
+    render a template that contain ``{{ name }}`` tags.
+
+``socon.utils.module_loading``
+===============================
+
+.. module:: socon.utils.module_loading
+   :synopsis: Functions for working with Python modules.
+
+Functions for working with Python modules.
+
+.. function:: import_string(dotted_path: str)
+
+    Imports a dotted module path and returns the attribute/class designated by
+    the last name in the path. Raises ``ImportError`` if the import failed. For
+    example::
+
+        from socon.utils.module_loading import import_string
+        ImproperlyConfigured = import_string('socon.core.exceptions.ImproperlyConfigured')
+
+    is equivalent to::
+
+        from socon.core.exceptions import ImproperlyConfigured

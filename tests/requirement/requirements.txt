@@ -1,0 +1,5 @@
+pytest==7.2.1
+pytest-datafixtures==1.0.0
+flake8==4.0.1
+isort==5.10.1
+pytest-cov==4.0.0

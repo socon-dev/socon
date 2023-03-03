@@ -1,0 +1,248 @@
+===================
+socon and manage.py
+===================
+
+This document will highlight the purpose and the use of both the ``socon``
+and ``manage.py`` command-line utility.
+
+``socon`` is Socon's command line utility for administrative tasks. It
+is mostly used when you haven't yet created a container.
+
+When a container is created the ``manage.py`` is automatically created in each
+Socon container. It does exactly the same thing as the ``socon`` command
+but it also sets the :envvar:`SOCON_SETTINGS_MODULE` environment variable that is
+used to set the main :file:`settings.py` file.
+
+Generally, when working on a single Socon container, it's easier to use
+``manage.py`` than ``socon``. If you need to switch between multiple
+Socon settings files, use ``socon`` with
+:envvar:`SOCON_SETTINGS_MODULE` or the :option:`--settings` command line
+option.
+
+Usage
+=====
+
+.. code-block:: console
+
+    $ socon <commad> [options]
+    $ python manage.py <commad> [options]
+    $ python -m socon <commad> [options]
+
+``command`` should be one of the commands listed below. ``options`` will depend
+on the command. A project command, will always require to have the :option:`--project`
+option no matter what.
+
+Getting help
+------------
+
+.. socon-admin:: help
+
+There are different ways of getting help using Socon.
+
+#. ``socon help`` to display information about commands associated
+   to Socon but also to the common space, the plugins and the projects.
+
+#. ``socon <command> help`` to display a description of the
+   given command and a list of available options.
+
+.. note::
+
+    .. program:: None
+
+    When using ``socon <command> help`` you can always specify
+    :option:`--project` if this command is part of a project or if it has been
+    redefined. If the command has been redefined in a project and you don't
+    specify :option:`--project` we will return the helper from the most important
+    registry that defines this command. More information :doc:`here </ref/manager>`
+
+Determining the version
+-----------------------
+
+.. socon-admin:: version
+
+Run ``socon version`` to display the current Socon version.
+
+The output follows the schema described in :pep:`440`::
+
+    1.0.dev4a7a299
+    1.0a1
+    1.0
+
+Displaying debug output
+-----------------------
+
+.. program:: None
+
+Use :option:`--verbosity` to specify the amount of notifications and debug
+information that ``socon`` prints to the console. By default the verbosity
+is set to ``0``.
+
+Available commands
+==================
+
+``createcontainer``
+-------------------
+
+.. socon-admin:: createcontainer name
+
+Create a Socon container directory structure for the given container name in
+the current directory.
+
+By default, the new directory contains ``manage.py``, the container package
+that stores the ``settings.py`` and the ``projects`` directory.
+
+.. socon-admin-option:: --target DIRECTORY
+
+Specify a destination directory.
+
+If only the container name is given, both the project directory and
+project package will be named ``<containername>`` and the container
+directory will be created in the current working directory.
+
+If the target directory is provided, Socon will use that existing
+directory as the container directory, and create ``manage.py`` and the container
+package within it. Use '.' to denote the current working directory.
+
+In case the directory does not exist, Socon will create it and use it as it's
+container directory.
+
+For example:
+
+.. code-block:: console
+
+    socon createcontainer mycontainer --target /Path/to/container/super_container
+
+``createproject``
+-----------------
+
+.. socon-admin:: creatproject name
+
+Create a Socon project directory structure for the given project name in the
+current directory under the ``projects`` directory.
+
+.. warning::
+
+    You must be in a container or inside the ``projects`` directory when
+    executing this command otherwise Socon will raise an exception.
+
+By default, the new directory contains a :file:`projects.py` file and a ``management``
+directory. :file:`projects.py` is used by Socon to register the project if defined
+by the :setting:`INSTALLED_PROJECTS` setting. The ``management`` directory contains the
+:file:`config.py` file that will hold your project settings.
+
+.. socon-admin-option:: --target DIRECTORY
+
+Specify a destination directory that must be in a container.
+
+If only the project name is given, the project directory will be created in
+the current container under the ``projects`` directory.
+
+If the target directory is provided, Socon will use that existing
+directory rather than creating a new one. You can use '.' to denote the current
+working directory. This mean the you can create a project outside a container
+using the target directory but it should point to a valid container.
+
+For example:
+
+.. code-block:: console
+
+    socon createproject myproject --target path/to/a/container
+
+``createplugin``
+----------------
+
+.. socon-admin:: createplugin name
+
+Create a Socon plugin directory structure for the given plugin name in the
+current directory.
+
+By default the new directory contains all the file to create a simple python
+package. A :file:`README.rst`, a :file:`setup.py` and a plugin package that
+store a file:`plugins.py` file that is used by Socon to register the plugin
+if defined by the :setting:`INSTALLED_PLUGINS` setting.
+
+.. socon-admin-option:: --target DIRECTORY
+
+Specify a destination directory.
+
+If only the plugin name is given, both the plugin directory and
+plugin package will be named ``<pluginname>`` and the plugin
+directory will be created in the current working directory.
+
+If the target directory is provided, Socon will use that existing
+directory as the plugin directory, and create all the necessary files.
+Use '.' to denote the current working directory.
+
+In case the directory does not exist, Socon will create it and use it as it's
+plugin directory.
+
+For example:
+
+.. code-block:: console
+
+    socon createplugin myplugin --target /path/to/plugins/super_plugin
+
+``check``
+---------
+
+.. socon-admin:: check
+
+Socon will perform a check on all installed projects and the common space. This means
+that Socon will check all managers and hooks that have been declared and raise
+any potential errors. By default the ``check`` command will
+raise the error and exit.
+
+.. socon-admin-option:: --show_all
+
+    Display all errors that the ``check`` command encountered when importing
+    configs and managers.
+
+Default options
+===============
+
+.. program:: None
+
+.. socon-admin-option:: --settings
+
+Specifies the settings module to use. The settings module should be in Python
+package syntax, e.g. ``mysite.settings``. If this isn't provided,
+``socon`` will use the :envvar:`SOCON_SETTINGS_MODULE` environment
+variable.
+
+This option is unnecessary in ``manage.py``, because it uses
+``settings.py`` from the current project by default.
+
+Example usage::
+
+    socon check --settings=mysite.settings
+
+.. socon-admin-option:: --project
+
+Specifies the project to use for the command.
+
+.. warning::
+
+    This option is mandatory for a project command. It is optional
+    when we run a general command.
+
+When we specify this option for a general command, Socon will check in the
+project directory of the project specified. If the project does not exist or
+the command is not in the project, an error will be raised.
+
+For a project command, this option is mandatory as the command needs to
+load a :class:`ProjectConfig` to work. If the project does not exist, an error
+will be raised by Socon.
+
+.. socon-admin-option:: --verbosity
+
+Specifies the amount of notifications and debug information that a command
+should print to the console.
+
+* ``0`` means no output.
+* ``1`` means normal output (default).
+* ``2`` means verbose output.
+* ``3`` means *very* verbose output.
+
+Example usage::
+
+    socon createproject --verbosity 2

@@ -1,0 +1,111 @@
+================================
+Change the behavior of a command
+================================
+
+Now that we have created multiple commands and projects, we are going to change
+the behavior of these commands for a specific project. This is where things
+get really interesting because, you can start to shape your framework as you
+want in order to fit your needs.
+
+How it works?
+-------------
+
+Socon works with managers and hooks. You can get more information :doc:`here </ref/manager>`.
+Commands are hooks of the :class:`CommandManager` class. It's
+this class that will look for every commands in the ``management/commands`` directory
+that you have in the common space, your projects and even Socon.
+
+When you start a command, Socon will look for this command in a specific order.
+The last being the most important:
+
+#. Socon
+#. Plugins
+#. Common
+#. Projects
+
+Here is an example: Let's use the ``build`` command that we created in the previous
+:doc:`tutorial </intro/tutorials/1_project_and_command>`.
+This command is common to all projects. If we don't redefine this command in one
+of the project, the :class:`CommandManager` will return the command from the
+common space.
+
+Now, if we define the ``build`` command in the ``apollo`` project,
+the :class:`CommandManager` will return that command instead of the one in the
+common space.
+
+Change the behavior
+--------------------
+
+To show the behavior described above, let's add a new argument to the ``apollo`` project.
+To do that we will take a shortcut and copy the ``build.py`` file from the common space
+to the ``apollo`` project:
+
+.. code-block:: console
+
+    $ cp tutorial/management/commands/build.py projects/apollo/management/commands/build.py
+
+If you start the ``help`` command using ``python manage.py help`` you will
+see that ``apollo`` has now a command called ``build``:
+
+.. code-block:: console
+
+    ...
+
+    [apollo]
+
+        build (P)
+
+If you start the command as usual, you won't see any difference as it will
+basically execute the same code. To change it's behavior, instead of subclassing
+this class from the :class:`ProjectCommand`, we will subclass it by the one in the common space.
+This way, we use object inheritance and we have an extension of the build command
+for the ``apollo`` project.
+
+The :file:`build.py` of apollo:
+
+.. code-block:: python
+
+    from argparse import ArgumentParser
+
+    from tutorial.management.commands.build import BuildCommand
+
+    from socon.core.management.base import Config
+    from socon.core.registry.base import ProjectConfig
+
+
+    class BuildCommand(BuildCommand):
+        name = 'build'
+
+        def add_arguments(self, parser: ArgumentParser) -> None:
+            super().add_arguments(parser)
+            parser.add_argument(
+                '--info', help='Add info to the handle command'
+            )
+
+        def handle(self, config: Config, project_config: ProjectConfig):
+            print(config.getoption('info'))
+            super().handle(config, project_config)
+
+
+Now you just have to execute the command from the apollo project like this:
+
+.. code-block:: console
+
+    $ python manage.py build --project apollo --info "5 Days left"
+
+You should see this result:
+
+.. code-block:: console
+
+    5 Days left
+    Building Saturn IB
+
+Congratulations! You have modified the behavior of the ``build`` command! You
+can now build any spacecraft you want :)
+
+.. note::
+
+    This also works for general commands. If you declare the same command
+    in one of your projects you will be able to access it if you add the
+    :option:`--project` option to the command. Try it for yourself and change
+    the behavior of the ``createcontainer`` command!
