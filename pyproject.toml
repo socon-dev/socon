@@ -43,4 +43,4 @@ packages = ["socon"]
 
 [tool.setuptools.dynamic]
 version = {attr = "socon.__version__"}
-readme = {file = ["README"]}
+readme = {file = ["README.rst"]}
