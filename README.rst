@@ -32,7 +32,7 @@ Documentation
 =============
 
 The full documentation is in the "``docs``" directory on `GitHub`_ or online at
-https://docs.socon.org/stable/
+https://socon.readthedocs.io/en/latest/
 
 If you are just getting started, We recommend that you read the documentation in this
 order:

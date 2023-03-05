@@ -33,6 +33,11 @@ dynamic = ["version", "readme"]
 [project.scripts]
 socon = "socon.core.management:execute_from_command_line"
 
+[project.urls]
+homepage = "https://socon.readthedocs.io/en/latest/"
+repository = "https://github.com/socon-dev/socon"
+changelog = "https://github.com/socon-dev/socon/blob/master/docs/internals/changelog.txt"
+
 [tool.setuptools]
 packages = ["socon"]
 
