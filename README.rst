@@ -2,8 +2,22 @@
 Socon
 =====
 
+.. image:: https://img.shields.io/badge/python-3.9-blue.svg
+    :target: https://github.com/socon-dev/socon
+
+.. image:: https://github.com/socon-dev/socon/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/socon-dev/socon/actions?query=workflow%3APython%20testing
+
+.. image:: https://github.com/socon-dev/socon/actions/workflows/linters.yml/badge.svg
+    :target: https://github.com/socon-dev/socon/actions?query=workflow%3APython%20linting
+
+.. image:: https://readthedocs.org/projects/socon/badge/?version=latest
+    :target: https://socon.readthedocs.io/en/latest/
+    :alt: Documentation Status
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
+
 
 Socon is a high-level Python framework that helps you develop a generic and
 robust framework for your different projects. Let us forget about
