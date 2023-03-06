@@ -21,6 +21,7 @@ pip-delete-this-directory.txt
 
 # Distribution / packaging
 *.egg-info/
+dist/
 
 # Unit test / coverage reports
 htmlcov/
