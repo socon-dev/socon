@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "socon"
-description = "A high-level Python framework that help you develop a generic, robust and reliable framework for your different projects."
+description = "A high-level Python framework that enables you develop a generic, robust and reliable framework for your different projects."
 authors = [
     {name = "Stephane Capponi", email = "stephane.capponi@gmail.com"}
 ]

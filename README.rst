@@ -65,7 +65,7 @@ Contribution
 ============
 
 Anyone can contribute to Socon's development. Checkout our documentation
-on how to get involved: `https://docs.socon.org/stable/`
+on how to get involved: `https://socon.readthedocs.io/en/latest/internals/contributing.html`
 
 This is a one man show for now, send help!
 
