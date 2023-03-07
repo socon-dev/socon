@@ -8,6 +8,10 @@ Socon
 .. image:: https://github.com/socon-dev/socon/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/socon-dev/socon/actions?query=workflow%3APython%20testing
 
+.. image:: https://codecov.io/gh/socon-dev/socon/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/socon-dev/socon
+    :alt: Code coverage Status
+
 .. image:: https://github.com/socon-dev/socon/actions/workflows/linters.yml/badge.svg
     :target: https://github.com/socon-dev/socon/actions?query=workflow%3APython%20linting
 
