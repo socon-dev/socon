@@ -16,6 +16,20 @@ section of releases.
 
     You can retrieve all deprecations :doc:`here </internals/deprecations>`
 
+Socon 0.1.1
+===========
+
+Bug Fixes:
+----------
+
+* `#2 <https://github.com/socon-dev/socon/issues/2>`_: Fixed by removing __pycache__ when rendering templates
+
+Improved Documentation
+----------------------
+
+* Fix link in CONTRIBUTION.rst
+* Fix spelling in pyproject.toml description
+
 Socon 0.1.0
 ===========
 
