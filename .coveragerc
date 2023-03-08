@@ -9,3 +9,4 @@ directory = coverage
 [report]
 exclude_lines =
     if TYPE_CHECKING:
+    if dirname == "__pycache__":
