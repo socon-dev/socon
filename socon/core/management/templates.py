@@ -60,13 +60,20 @@ class TemplateCommand(BaseCommand, abstract=True):
 
         template_dir = Path(socon.__path__[0], "conf", base_subdir)
 
-        for root, _, files in os.walk(template_dir):
+        for root, dirs, files in os.walk(template_dir):
             relative_dir = str(Path(root).relative_to(template_dir))
             relative_dir = relative_dir.replace(base_name, name)
 
             # Make the target directory
             target_dir = Path(top_dir, relative_dir)
             os.makedirs(target_dir, exist_ok=True)
+
+            for dirname in dirs[:]:
+                # Remove __pycache__ as it's possible that when we execute a template
+                # command we try to read it's content with FileReshape. This might
+                # cause in the worst case a decode error.
+                if dirname == "__pycache__":
+                    dirs.remove(dirname)
 
             for filename in files:
                 old_path = Path(root, filename)
