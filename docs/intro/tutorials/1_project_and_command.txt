@@ -125,7 +125,7 @@ Register your project
 
 Now that we have created our project, we will be able to create our first
 command. But before that we need to register our project in the settings that you
-can find in ``tutorial/management/settings.py``. You can find more
+can find in ``tutorial/settings.py``. You can find more
 about settings :doc:`here </ref/settings>`.
 
 Replace ``INSTALLED_PROJECTS`` by this one:
