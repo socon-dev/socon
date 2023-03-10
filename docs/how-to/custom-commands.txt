@@ -109,7 +109,7 @@ the :setting:`INSTALLED_PLUGINS`, the common space, and finally the
 :setting:`INSTALLED_PROJECTS`.
 
 During the search, each command are registered in the :class:`CommandManager`
-and saved alongside it's config object. When Socon looks for a command it will
+and saved alongside its config object. When Socon looks for a command it will
 proceed as follows:
 
     #. Search in Socon config for built-in commands.

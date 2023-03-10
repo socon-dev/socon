@@ -293,7 +293,7 @@ class BaseManager:
         Add a hook to the manager. This function is automatically
         called from the __init_subclass__ of the hooked subclass
         """
-        # Check if the command module has a name attribute. If it's name
+        # Check if the command module has a name attribute. If it's
         # the case, we will use the name of the class
         hook_name = getattr(hook, "name", hook.__name__)
 
@@ -303,7 +303,7 @@ class BaseManager:
         configs = self.hooks[config.registry.name]
 
         # Save in the registry the config label associated with
-        # the label of the hook and it's class. If the label already
+        # the label of the hook and its class. If the label already
         # exist we raise an ImportError
         if any(hook_name in n for n in configs.get(config.label, [])):
             raise ImproperlyConfigured(

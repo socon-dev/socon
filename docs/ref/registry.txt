@@ -74,7 +74,7 @@ the possibility to people to share their work and idea to everyone.
 
 Imagine that you have work on your Socon based framework that calculate
 the trajectory of a spaceship to go to space. You created a spaceship
-:doc:`/ref/manager` to get all the information about a spaceship (it's weight, it's length...)
+:doc:`/ref/manager` to get all the information about a spaceship (its weight, its length...)
 and a calculate command that will calculate and trace the trajectory.
 How do you make this reusable ? You want people to be able to simply define a
 spaceship and it will calculate everything for them. Well Socon provide a way

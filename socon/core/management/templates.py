@@ -70,7 +70,7 @@ class TemplateCommand(BaseCommand, abstract=True):
 
             for dirname in dirs[:]:
                 # Remove __pycache__ as it's possible that when we execute a template
-                # command we try to read it's content with FileReshape. This might
+                # command we try to read its content with FileReshape. This might
                 # cause in the worst case a decode error.
                 if dirname == "__pycache__":
                     dirs.remove(dirname)

@@ -107,11 +107,11 @@ Now that we have created a project. Let's look at what's inside::
 These files are:
 
 * The outer :file:`artemis/` root directory is your project that will
-  hold it's configuration and every command, hook and manager that you will
+  hold its configuration and every command, hook and manager that you will
   create during your project lifetime.
 
 * :file:`artemis/projects.py`: Configure your project in this file for example
-  it's name, the path to it's configuration file and more.
+  its name, the path to its configuration file and more.
 
 * :file:`artemis/management/config.py`: The configuration file for your project.
   This acts the same way as ``tutorial/settings.py`` but will only be visible for
@@ -220,7 +220,7 @@ This is really important. In Socon there is only two class for the commands.
 Then we need to define the subclass :class:`LaunchCommand`. The name of the class
 is important only if you don't want to set the
 :attr:`~socon.core.management.BaseCommand.name` attribute. Socon
-will only keep the part before ``Command``. Which mean it's name would
+will only keep the part before ``Command``. Which mean its name would
 have been the same as the one we defined above.
 
 .. note::
@@ -357,7 +357,7 @@ The ``tutorial/settings.py`` which is common to all projects:
 
 .. code-block:: python
 
-    # My beautifull country
+    # My beautiful country
     COUNTRY = 'France'
 
 .. warning::

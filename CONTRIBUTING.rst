@@ -3,7 +3,7 @@ Contributing to Socon
 =====================
 
 We would highly appreciate any kind of contribution to the project. As the
-project is still as it's premise we need more people than ever. You can
+project is still as its premise we need more people than ever. You can
 contribute to Socon in many ways by fixing bugs, writing docs, proposing
 new features and many more. Every little bit helps!
 

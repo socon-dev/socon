@@ -226,7 +226,7 @@ class CommandManager(BaseManager, name="commands"):
                 terminal.write("\n")
 
     def search_command(self, name: str) -> Type[BaseCommand]:
-        """Search a command and return it's class"""
+        """Search a command and return its class"""
         current_project = os.environ.get("SOCON_ACTIVE_PROJECT")
         project_config = None
 

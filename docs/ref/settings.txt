@@ -120,7 +120,7 @@ For a full list of available settings, see the :doc:`settings reference </ref/li
 Projects settings
 =================
 
-Each project can define it's own settings that will be loaded at the start
+Each project can define its own settings that will be loaded at the start
 of the program. Project settings respect the :ref:`basics <settings-basic>` of
 settings.
 

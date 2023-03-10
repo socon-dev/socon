@@ -92,7 +92,7 @@ returns the :attr:`RegistryConfig.name <socon.core.registry.RegistryConfig.name>
 :attr:`~socon.core.manager.BaseManager.lookup_module`.
 For example: ``projects.apollo.builder`` if we are looking for the builder module
 inside the project ``apollo``. Then we import the module and every class that
-inherits from :class:`~socon.core.manager.Hook` will be registered to it's manager.
+inherits from :class:`~socon.core.manager.Hook` will be registered to its manager.
 
 By overriding the :meth:`~socon.core.manager.BaseManager.get_modules` method, you
 can provide your own way of finding modules. That is what we have done for
@@ -144,7 +144,7 @@ Let's create a ``builder.py`` next to the ``managers.py``.
         def build(self, spacecraft: SpaceCraft):
             print("Building {}".format(spacecraft.name))
 
-The important thing here is the name of the manager that this hook and all it's
+The important thing here is the name of the manager that this hook and all its
 subclass will be linked to. This is really important. If you forget it, when
 Socon will import the module, it will throw you an error.
 Every class that inherit from :class:`~socon.core.manager.Hook` must define
@@ -207,7 +207,7 @@ Overriding hooks
 
 During the search (when we call the :meth:`~socon.core.manager.BaseManager.find_all` method),
 each hook is registered in a manager, like the ``BuildManager``,
-and saved alongside it's config object. When Socon looks for a hook using
+and saved alongside its config object. When Socon looks for a hook using
 :meth:`~socon.core.manager.BaseManager.search_hook_impl` it will proceed as follows:
 
     #. Did the user pass a config object?

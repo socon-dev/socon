@@ -103,7 +103,7 @@ If the target directory is provided, Socon will use that existing
 directory as the container directory, and create ``manage.py`` and the container
 package within it. Use '.' to denote the current working directory.
 
-In case the directory does not exist, Socon will create it and use it as it's
+In case the directory does not exist, Socon will create it and use it as its
 container directory.
 
 For example:
@@ -173,7 +173,7 @@ If the target directory is provided, Socon will use that existing
 directory as the plugin directory, and create all the necessary files.
 Use '.' to denote the current working directory.
 
-In case the directory does not exist, Socon will create it and use it as it's
+In case the directory does not exist, Socon will create it and use it as its
 plugin directory.
 
 For example:

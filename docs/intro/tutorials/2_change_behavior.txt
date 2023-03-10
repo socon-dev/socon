@@ -56,7 +56,7 @@ see that ``apollo`` has now a command called ``build``:
         build (P)
 
 If you start the command as usual, you won't see any difference as it will
-basically execute the same code. To change it's behavior, instead of subclassing
+basically execute the same code. To change its behavior, instead of subclassing
 this class from the :class:`ProjectCommand`, we will subclass it by the one in the common space.
 This way, we use object inheritance and we have an extension of the build command
 for the ``apollo`` project.

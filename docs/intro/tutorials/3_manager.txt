@@ -118,7 +118,7 @@ In this class we have defined two important things:
   won't need to register the main hook class. This is because it can
   be an abstract base class and we don't want to see it as a manager.
 
-* :attr:`manager`: The name of the manager that this hook and all it's subclass will be linked to.
+* :attr:`manager`: The name of the manager that this hook and all its subclass will be linked to.
   This is really important. If you forget that and you register your hooks,
   this will throw you an error. Every class that inherit from :class:`Hook` must
   define the :attr:`manager` attribute.

@@ -45,7 +45,7 @@ This command will create a directory ``space_plugin``, which will look like this
         setup.py
 
 * The outer :file:`space_plugin/` root directory is your plugin that will
-  hold it's configuration and every commands, hooks and managers that will
+  hold its configuration and every commands, hooks and managers that will
   help others develop robust and reliable framework.
 
 * :file:`README.rst`: Everyone knows that file. Document it well and explain

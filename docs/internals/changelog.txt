@@ -4,7 +4,7 @@ Changelog
 
 Versions follow `Semantic Versioning <https://semver.org/>`_ (``<major>.<minor>.<patch>``).
 
-Right now Socon is at it's premise. For that reason, there might be backward
+Right now Socon is at its premise. For that reason, there might be backward
 incompatibility between two minors. If that is the case we will
 still notice in the **Deprecations** section of the releases.
 
