@@ -1,0 +1,36 @@
+default_language_version:
+    python: "3.9"
+
+repos:
+
+- repo: https://github.com/psf/black
+  rev: 23.1.0
+  hooks:
+    - id: black
+      exclude: \.py-tpl$
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 4.0.1
+  hooks:
+    - id: flake8
+      language_version: python3
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+
+- repo: local
+  hooks:
+    - id: github-issue
+      name: check for github issue
+      language: pygrep
+      entry: '\A(?!\[#[0-9]+\])'
+      args: [--multiline]
+      stages: [commit-msg]

@@ -4,6 +4,20 @@ Coding style
 
 Please use following document when writing code for Socon.
 
+Pre-commit
+==========
+
+https://pre-commit.com/ is a framework for managing and maintaining multi-language
+pre-commit hooks to ensure code-style and code formatting is consistent::
+
+  $ pip install pre-commit
+  $ pre-commit install
+  $ pre-commit install --hook-type commit-msg
+
+Afterwards ``pre-commit`` will run whenever you commit. The first commit might take
+some time as pre-commmit will install the hooks in their own environment.
+Subsequent checks will be significantly faster.
+
 Python styles
 =============
 

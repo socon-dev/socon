@@ -178,6 +178,17 @@ Find below an example on how to fork Socon and make a pull request:
 
    $ git remote add upstream https://github.com/socon-dev/socon
 
+#. Install `pre-commit <https://pre-commit.com>`_::
+
+   $ pip install pre-commit
+   $ pre-commit install
+   $ pre-commit install --hook-type commit-msg
+
+   Afterwards ``pre-commit`` will run whenever you commit.
+
+   https://pre-commit.com/ is a framework for managing and maintaining multi-language
+   pre-commit hooks to ensure code-style and code formatting is consistent.
+
 #. Install ``tox``. This tool runs all the tests and will automatically
    setup a virtual environment to run the tests in::
 
@@ -187,7 +198,7 @@ Find below an example on how to fork Socon and make a pull request:
 
 #. Run the tests + linting with tox::
 
-   $ tox -e flake8,py39
+   $ tox -e flake8,isort,black,py39
 
    This command will run tests via ``tox`` tool against python 3.9 and perform
    a ``lint`` coding style check using ``flake8``
@@ -204,11 +215,11 @@ Find below an example on how to fork Socon and make a pull request:
 
 #. Commit and push once your tests pass and you are happy with your changes::
 
-      $ git commit -m "#ticket-id <commit message>"
+      $ git commit -m "[#ticket-id] <commit message>"
       $ git push -u
 
    The ticket id that you are working on must be put in the commit message
-   using #ticket-id
+   using [#ticket-id]
 
 #. Finally, submit your pull request through the GiHub website. When your
    pull request will be created, Socon will automatically tests your pull
