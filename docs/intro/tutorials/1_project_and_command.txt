@@ -535,7 +535,7 @@ project we don't have to specify the :option:`--project` option.
 
 .. code-block:: console
 
-    $ python manage.py deploy.py
+    $ python manage.py deploy
 
 Doing do so the output will be:
 
