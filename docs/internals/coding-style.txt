@@ -15,7 +15,7 @@ pre-commit hooks to ensure code-style and code formatting is consistent::
   $ pre-commit install --hook-type commit-msg
 
 Afterwards ``pre-commit`` will run whenever you commit. The first commit might take
-some time as pre-commmit will install the hooks in their own environment.
+some time as pre-commit will install the hooks in their own environment.
 Subsequent checks will be significantly faster.
 
 Python styles
