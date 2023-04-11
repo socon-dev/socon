@@ -18,7 +18,7 @@ class override_settings:
     def __init__(self, **kwargs: Any):
         self.options = kwargs
 
-    def decorate_Callable(self, func: Callable) -> Callable:
+    def decorate_callable(self, func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
             with self:
@@ -26,10 +26,31 @@ class override_settings:
 
         return inner
 
+    def decorate_class(self, cls: type) -> type:
+        class wrapped(cls):
+            @classmethod
+            def setup_class(cls):
+                self.enable()
+
+            @classmethod
+            def teardown_class(cls):
+                self.disable()
+
+        return wrapped
+
     def __call__(self, decorated: Callable) -> Callable:
-        return self.decorate_Callable(decorated)
+        if isinstance(decorated, type):
+            return self.decorate_class(decorated)
+        else:
+            return self.decorate_callable(decorated)
 
     def __enter__(self) -> None:
+        self.enable()
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        self.disable()
+
+    def enable(self) -> None:
         # Keep this code at the beginning to leave the settings unchanged
         # in case it raises an exception because INSTALLED_PROJECTS is invalid.
         if "INSTALLED_PROJECTS" in self.options:
@@ -57,7 +78,7 @@ class override_settings:
         self.wrapped = settings._wrapped
         settings._wrapped = override
 
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+    def disable(self) -> None:
         if "INSTALLED_PROJECTS" in self.options:
             projects.unset_installed_configs()
         if "INSTALLED_PLUGINS" in self.options:

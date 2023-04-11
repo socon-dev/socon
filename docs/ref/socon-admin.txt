@@ -246,3 +246,28 @@ should print to the console.
 Example usage::
 
     socon createproject --verbosity 2
+
+==========================================
+Running management commands from your code
+==========================================
+
+.. function:: socon.core.management.call_command(name, *args)
+
+To call a management command from code use ``call_command``.
+
+``name``
+  the name of the command to call.
+
+``*args``
+  a list of arguments accepted by the command. Arguments are passed to the
+  argument parser, so you can use the same style as you would on the command
+  line.
+
+Examples::
+
+      from socon.core.management import call_command
+
+      management.call_command('createcontainer', 'test', '--target=dir')
+
+The return value of the ``call_command()`` function is the same as the return
+value of the ``handle()`` method of the command.
