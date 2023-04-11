@@ -393,6 +393,12 @@ class PluginConfigTests:
         """Verify that the plugin is correctly installed"""
         assert registry.plugins.is_installed("registry.plugins") is True
 
+    def test_plugin_installed_exception(self):
+        """Raise an exception and uninstall all previously installed plugin"""
+        with pytest.raises(ModuleNotFoundError):
+            with override_settings(INSTALLED_PLUGINS=["registry.foo"]):
+                pass
+
 
 class CoreRegistryTests:
     @pytest.mark.parametrize("config_name", ("registry", "common", "socon", "foo"))

@@ -21,10 +21,22 @@ from socon.core.management.base import (
 )
 from socon.core.manager import BaseManager
 from socon.core.registry import projects
+from socon.utils.func import set_env
 from socon.utils.terminal import terminal
 
 if TYPE_CHECKING:
     from socon.core.management.base import BaseCommand, CommandManager
+
+
+def get_commands() -> CommandManager:
+    """
+    Return a CommandManager instance that hold all the commands. The
+    registry will look for every modules in management.commands in each registry
+    config. This mean the core registry config, the common config of the user
+    and every projects and plugins. Core commands are always included.
+    """
+    command_manager = BaseManager.get_manager("commands")
+    return command_manager.find_all()
 
 
 class ManagementUtility:
@@ -39,19 +51,9 @@ class ManagementUtility:
             self.prog_name = "python -m socon"
         self.settings_exception = None
 
-    def get_commands(self) -> CommandManager:
-        """
-        Return a CommandManager instance that hold all the commands. The
-        registry will look for every modules in management.commands in each registry
-        config. This mean the core registry config, the common config of the user
-        and every projects and plugins. Core commands are always included.
-        """
-        command_manager = BaseManager.get_manager("commands")
-        return command_manager.find_all()
-
     def main_help_text(self) -> None:
         """Print script's main help text."""
-        commands = self.get_commands()
+        commands = get_commands()
         commands.print_commands_usage(self.prog_name)
 
         # Output an extra note if settings are not properly configured
@@ -87,7 +89,7 @@ class ManagementUtility:
         "socon" or "manage.py") if it can't be found.
         """
         # Get commands outside of try block to prevent swallowing exceptions
-        commands = self.get_commands()
+        commands = get_commands()
         try:
             command = commands.search_command(subcommand)
         except CommandNotFound:
@@ -178,6 +180,52 @@ class ManagementUtility:
             self.main_help_text()
         else:
             self.fetch_command(subcommand).run_from_argv(self.argv)
+
+
+def call_command(name: str, *args):
+    """Call the given command, with the given args/options. Example:
+
+    call_command('createcontainer', 'test_container', '--target', 'directory')
+
+    :param name: Name of the command
+    :param *args: Arguments for the command
+    :return: Command output
+    """
+    command_manager = get_commands()
+
+    # Check if the user passed a project in order to get the right command
+    parse_args = []
+    project = ""
+    for i, arg in enumerate(args):
+        parse_args.append(str(arg))
+        if arg == "--project":
+            try:
+                project = args[i + 1]
+            except IndexError:
+                raise CommandError("Project was passed but not defined")
+
+    # Search for the command
+    command = command_manager.search_command(name, project)()
+
+    # Create the parser and save the args
+    parser = command.create_parser("", name)
+
+    # Parser the args
+    extras_args = []
+    if command.keep_extras_args:
+        cmd_args, extras_args = parser.parse_known_args(parse_args)
+    else:
+        cmd_args = parser.parse_args(parse_args)
+
+    # Create the conmand config object
+    config = command.set_config(cmd_args, extras_args)
+
+    # We change the active project for the command using a context manager. This is
+    # important as the execute command for a ProjectCommand, will look for
+    # the SOCON_ACTIVE_PROJECT environment to set the project_config of that command.
+    project = project if project else os.environ.get("SOCON_ACTIVE_PROJECT", "")
+    with set_env(SOCON_ACTIVE_PROJECT=project):
+        return command.execute(config)
 
 
 def execute_from_command_line(argv: list = None) -> None:

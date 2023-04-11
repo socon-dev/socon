@@ -5,4 +5,4 @@ class SimpleCommand(ProjectCommand):
     name = "simple_command"
 
     def handle(self, config, project_config):
-        pass
+        return project_config.label

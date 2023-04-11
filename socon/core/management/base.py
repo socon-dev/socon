@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, NoReturn, Optional, Type, Union
 
 import socon
 
-from socon.core.exceptions import CommandNotFound, HookNotFound, ImproperlyConfigured
+from socon.core.exceptions import CommandNotFound, HookNotFound
 from socon.core.manager import BaseManager, Hook
 from socon.core.registry import projects, registry
 from socon.core.registry.config import RegistryConfig
@@ -225,16 +225,21 @@ class CommandManager(BaseManager, name="commands"):
             if reg != list(hooks_reg)[-1]:
                 terminal.write("\n")
 
-    def search_command(self, name: str) -> Type[BaseCommand]:
+    def search_command(self, name: str, project: str = None) -> Type[BaseCommand]:
         """Search a command and return its class"""
         current_project = os.environ.get("SOCON_ACTIVE_PROJECT")
+
+        # If the user pass a project, it takes over the environment variable
+        if project is not None:
+            current_project = project
+
         project_config = None
 
         if current_project:
             try:
                 project_config = projects.get_registry_config(current_project)
             except LookupError:
-                raise ImproperlyConfigured(
+                raise CommandError(
                     f"You are looking for '{name}' command in  "
                     f"'{current_project}' project that is not installed. Please "
                     "check your INSTALLED_PROJECTS"
@@ -325,6 +330,11 @@ class BaseCommand(Hook, abstract=True):
 
         super().__init_subclass__(**kwargs)
 
+    def set_config(self, options: Namespace, extras_args: list = []) -> Type[Config]:
+        """Set the command config"""
+        self.config = self.baseconfig(options, extras_args)
+        return self.config
+
     def create_parser(
         self, prog_name: str, subcommand: str, **kwargs: Any
     ) -> ArgumentParser:
@@ -369,6 +379,7 @@ class BaseCommand(Hook, abstract=True):
             choices=[0, 1, 2, 3],
             help="Verbosity level; 0=minimal output, 1=normal output, 2=verbose output, 3=very verbose output",
         )
+        self.add_arguments(parser)
         return parser
 
     def add_arguments(self, parser: ArgumentParser) -> None:
@@ -395,7 +406,6 @@ class BaseCommand(Hook, abstract=True):
         """
         self._called_from_command_line = True
         parser = self.create_parser(argv[0], argv[1])
-        self.add_arguments(parser)
 
         extras_args = []
         if self.keep_extras_args:
@@ -406,10 +416,10 @@ class BaseCommand(Hook, abstract=True):
         handle_default_options(options)
 
         # Create a config object that will store all the options
-        self.config = self.baseconfig(options, extras_args)
+        config = self.set_config(options, extras_args)
 
         try:
-            output = self.execute(self.config)
+            output = self.execute(config)
         except CommandError as e:
             if options.traceback:
                 raise

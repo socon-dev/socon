@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023, Stephane Capponi and Others
 
+import contextlib
+import os
+
 from typing import Any, Optional
 
 
@@ -24,3 +27,17 @@ def get_object_attr(
         if skip:
             return default
         raise ValueError(msg) from e
+
+
+@contextlib.contextmanager
+def set_env(**environ):
+    """
+    Temporarily set any environment variables.
+    """
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
