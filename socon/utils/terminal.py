@@ -5,9 +5,79 @@
 import shutil
 import sys
 
-from typing import Optional, TextIO
+from typing import Optional, TextIO, Union
 
-# This code was initially copied from pytest 7.2, file src/_pytest/terminal.py.
+color_names = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
+foreground = {color_names[x]: "3%s" % x for x in range(8)}
+background = {color_names[x]: "4%s" % x for x in range(8)}
+decorator = {
+    "reset": "0",
+    "bold": "1",
+    "underscore": "4",
+    "blink": "5",
+    "reverse": "7",
+    "conceal": "8",
+}
+
+
+def colorize(
+    msg: str, opts: Union[tuple, list] = [], fg: str = None, bg: str = None, **_: dict
+) -> str:
+    """
+    Return your text enclosed by ANSI graphics code
+
+    :param msg: Text message
+    :param opts: Text decoration like:
+        - 'bold'
+        - 'underscore'
+        - 'blink'
+        - 'reverse'
+        - 'conceal'
+        - 'noreset' - string will not be auto-terminated with the RESET code
+
+    :param fg: Foreground colors
+    :param bg: Background colors
+
+    Valid colors:
+        - 'black'
+        - 'red'
+        - 'green'
+        - 'yellow'
+        - 'blue'
+        - 'magenta'
+        - 'cyan'
+        - 'white'
+
+    Examples:
+        colorize('hello', fg='red', bg='blue', opts=('blink',))
+        print(colorize('first line', fg='red', opts=('noreset',)))
+        print('this should be red too')
+        colorize(opts=('reset',))
+        print('This will be print with default color')
+    """
+    markup = []
+
+    # Do not accept None message
+    if msg is None:
+        msg = ""
+
+    if len(opts) == 0 and fg is None and bg is None:
+        return msg
+    if msg == "" and len(opts) == 1 and opts[0] == "reset":
+        return "\x1b[{}m".format(decorator["reset"])
+    if fg in foreground:
+        markup.append(foreground[fg])
+    if bg in background:
+        markup.append(background[bg])
+    for o in opts:
+        if o in decorator:
+            markup.append(decorator[o])
+    if "noreset" not in opts:
+        msg = "{}\x1b[{}m".format(msg or "", decorator["reset"])
+    return "{}{}".format(("\x1b[{}m".format(";".join(markup))), msg or "")
+
+
+# The code below was initially copied from pytest 7.2, file src/_pytest/terminal.py.
 # Link to the project: https://github.com/pytest-dev/pytest
 
 
@@ -43,12 +113,33 @@ class TerminalWriter:
         self._terminal_width = value
 
     def sep(
-        self, sepchar: str, title: Optional[str] = None, fullwidth: Optional[int] = None
+        self,
+        sepchar: str,
+        title: Optional[str] = None,
+        fullwidth: Optional[int] = None,
+        **markup: dict,
     ) -> None:
         """
         Create a separator line with or without a title. By default the
         separator will use the fullwidth of the terminal. A specific width
-        can be passed to the function if required
+        can be passed to the function if required.
+
+        The separator can be styled using the **markup. You can pass
+        fg, bg and opts as markups.
+
+        fg: Forground color
+        bg: Background color
+        opts: Text decoration
+
+        Valid colors:
+            'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
+
+        Valid decorators:
+            'bold', 'underscore', 'blink', 'reverse', 'conceal', 'noreset'
+
+        Example:
+            terminal.sep('-', 'colorize', fg='blue', opts=('bold',))
+
         """
         if fullwidth is None:
             fullwidth = self.fullwidth
@@ -78,16 +169,35 @@ class TerminalWriter:
         if len(line) + len(sepchar.rstrip()) <= fullwidth:
             line += sepchar.rstrip()
 
-        self.line(line)
+        self.line(line, **markup)
 
-    def write(self, msg: str, *, flush: bool = False) -> None:
-        """Write to the terminal"""
+    def write(self, msg: str, *, flush: bool = False, **markup: dict) -> None:
+        """
+        Write to the terminal. You can style the text using the **markup. You can pass
+        fg, bg and opts as markups.
+
+        fg: Forground color
+        bg: Background color
+        opts: Text decoration
+
+        Valid colors:
+            'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
+
+        Valid decorators:
+            'bold', 'underscore', 'blink', 'reverse', 'conceal', 'noreset'
+
+        Example:
+            terminal.write('message', fg='blue', opts=('bold',))
+        """
         if msg:
             current_line = msg.rsplit("\n", 1)[-1]
             if "\n" in msg:
                 self._current_line = current_line
             else:
                 self._current_line += current_line
+
+            # Apply markup style to the message
+            msg = colorize(msg, **markup)
 
             try:
                 self._stream.write(msg)
@@ -104,17 +214,49 @@ class TerminalWriter:
             if flush:
                 self.flush()
 
-    def line(self, msg: str = "") -> None:
-        """Write a message that will end with a new line"""
-        self.write(msg)
+    def line(self, msg: str = "", **markup: dict) -> None:
+        """
+        Write a message that will end with a new line.
+        You can style the text using the **markup. You can pass
+        fg, bg and opts as markups.
+
+        fg: Forground color
+        bg: Background color
+        opts: Text decoration
+
+        Valid colors:
+            'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
+
+        Valid decorators:
+            'bold', 'underscore', 'blink', 'reverse', 'conceal', 'noreset'
+
+        Example:
+            terminal.line('message', fg='blue', opts=('bold',))
+        """
+        self.write(msg, **markup)
         self.write("\n")
 
     def flush(self) -> None:
         self._stream.flush()
 
-    def rewrite(self, line: str, erase: bool = False) -> None:
+    def rewrite(self, line: str, erase: bool = False, **markup: dict) -> None:
         """
         Rewinds the terminal cursor to the beginning and writes the given line.
+        You can style the text using the **markup. You can pass
+        fg, bg and opts as markups.
+
+        fg: Forground color
+        bg: Background color
+        opts: Text decoration
+
+        Valid colors:
+            'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
+
+        Valid decorators:
+            'bold', 'underscore', 'blink', 'reverse', 'conceal', 'noreset'
+
+        Example:
+            terminal.rewrite('message', fg='blue', opts=('bold',))
         """
         if erase:
             fill_count = self.fullwidth - len(line) - 1
@@ -122,12 +264,28 @@ class TerminalWriter:
         else:
             fill = ""
         line = str(line)
-        self.write("\r" + line + fill)
+        self.write("\r" + line + fill, **markup)
 
-    def underline(self, msg: str, decorator: str = "-") -> None:
-        """Underline a text with a decorator"""
-        self.line(msg)
-        self.line(decorator * len(msg))
+    def underline(self, msg: str, decorator: str = "-", **markup: dict) -> None:
+        """
+        Underline a text with a decorator. You can style the text using the **markup.
+        You can pass fg, bg and opts as markups.
+
+        fg: Forground color
+        bg: Background color
+        opts: Text decoration
+
+        Valid colors:
+            'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'
+
+        Valid decorators:
+            'bold', 'underscore', 'blink', 'reverse', 'conceal', 'noreset'
+
+        Example:
+            terminal.underline('message', fg='blue', opts=('bold',))
+        """
+        self.line(msg, **markup)
+        self.line(decorator * len(msg), **markup)
         self.write("\n")
 
 

@@ -12,7 +12,7 @@ import pytest
 from pytest import MonkeyPatch
 
 from socon.utils import terminal
-from socon.utils.terminal import TerminalWriter
+from socon.utils.terminal import TerminalWriter, colorize
 
 # This code was initially copied from pytest 7.2, file src/_pytest/terminal.py.
 # Link to the project: https://github.com/pytest-dev/pytest
@@ -141,3 +141,52 @@ class TerminalWriterTests:
         tr = TerminalWriter(f)
         tr.write("")
         assert f.getvalue() == ""
+
+
+class TerminalColorTests:
+    @pytest.fixture()
+    def tw(self):
+        f = StringIO()
+        tw = TerminalWriter(f)
+
+        def getlines():
+            f.seek(0)
+            return f.readlines()
+
+        tw.getlines = getlines  # type: ignore
+        tw.getvalue = lambda: "".join(getlines())  # type: ignore
+
+        with f:
+            yield tw
+
+    def test_colorize_empty_msg(self):
+        assert colorize(msg=None) == ""
+        assert colorize(msg="") == ""
+
+        assert colorize(msg=None, opts=("noreset",)) == "\x1b[m"
+        assert colorize(msg="", opts=("noreset",)) == "\x1b[m"
+
+    def test_colorize_reset(self):
+        assert colorize(msg="", opts=("reset",)) == "\x1b[0m"
+
+    def test_colorize_fg_bg(self):
+        assert colorize(msg="Test", fg="red") == "\x1b[31mTest\x1b[0m"
+        assert colorize(msg="Test", bg="red") == "\x1b[41mTest\x1b[0m"
+        # Ignored kwarg.
+        assert colorize(msg="Test") == "Test"
+
+    def test_colorize_opts(self):
+        assert (
+            colorize(msg="Test", opts=("bold", "underscore")) == "\x1b[1;4mTest\x1b[0m"
+        )
+        assert colorize(msg="Test", opts=("blink",)) == "\x1b[5mTest\x1b[0m"
+        # Ignored opts.
+        assert colorize(msg="Test", opts=("not_an_option",)) == "\x1b[mTest\x1b[0m"
+
+    def test_terminal_markup_on_write(self, tw):
+        tw.write("Test", fg="red")
+        assert tw.getvalue() == "\x1b[31mTest\x1b[0m"
+
+    def test_terminal_markup_on_line(self, tw):
+        tw.line("Test", fg="red")
+        assert tw.getvalue() == "\x1b[31mTest\x1b[0m\n"
