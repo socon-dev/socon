@@ -13,6 +13,48 @@ Terminal
 This document will present the :class:`TerminalWriter` that Socon use
 to print information in the terminal. We believe that this can be really
 useful for Socon based framework to display information in the terminal.
+We will also show how to colorize the output of the terminal using the
+:func:`colorize` function.
+
+Colorize function
+=================
+
+.. function:: colorize(opts: Union[tuple, list] = [], fg: str = None, bg: str = None, **_: dict)
+
+    Return your text enclosed by ANSI graphics code.
+
+    :param msg: Text message
+    :param opts: Text decorations
+    :param fg: Foreground colors
+    :param bg: Background colors
+
+    **Valid decorators:**
+
+        - 'bold'
+        - 'underscore'
+        - 'blink'
+        - 'reverse'
+        - 'conceal'
+        - 'noreset' - string will not be auto-terminated with the RESET code
+
+    **Valid colors:**
+
+        - 'black'
+        - 'red'
+        - 'green'
+        - 'yellow'
+        - 'blue'
+        - 'magenta'
+        - 'cyan'
+        - 'white'
+
+    **Examples:**
+
+        | colorize('hello', fg='red', bg='blue', opts=('blink',))
+        | print(colorize('first line', fg='red', opts=('noreset',)))
+        | print('this should be red too')
+        | colorize(opts=('reset',))
+        | print('This will be print with default color')
 
 TerminalWriter objects
 ======================
@@ -39,29 +81,44 @@ Read-only attributes
 Methods
 -------
 
-.. method:: sep(sepchar: str, title: str = None, fullwidth: int = None)
+.. method:: TerminalWriter.sep(sepchar: str, title: str = None, fullwidth: int = None, **markup)
 
     Create a separator line with or without a title. By default the
     separator will use the fullwidth of the terminal. A specific width
     can be passed to the function if required.
 
-.. method:: write(msg: str, *, flush: bool = False)
+    :param markup: Parameters of the :func:`colorize` function.
+        Example: tw.sep('-', 'Hello', fg='blue')
+
+.. method:: TerminalWriter.write(msg: str, *, flush: bool = False. **markup)
 
     Write a message to the terminal.
 
-.. method:: line(msg: str)
+    :param markup: Parameters of the :func:`colorize` function.
+        Example: tw.write('Hello', fg='blue')
+
+.. method:: TerminalWriter.line(msg: str, **markup)
 
     Write a message that will end with a new line.
 
-.. method:: flush()
+    :param markup: Parameters of the :func:`colorize` function.
+        Example: tw.line('Hello', fg='blue')
+
+.. method:: TerminalWriter.flush()
 
     Flush the stream output buffer. The write everything in the buffer
     to the terminal.
 
-.. method:: rewrite(line: str, erase: bool = False)
+.. method:: TerminalWriter.rewrite(line: str, erase: bool = False, **markup)
 
     Rewinds the terminal cursor to the beginning and writes the given line.
 
-.. method:: underline(msg: str, decorator: str = '-')
+    :param markup: Parameters of the :func:`colorize` function.
+        Example: tw.rewrite('Hello', fg='blue')
+
+.. method:: TerminalWriter.underline(msg: str, decorator: str = '-', **markup)
 
     Underline a message with a decorator.
+
+    :param markup: Parameters of the :func:`colorize` function.
+        Example: tw.underline('Hello', fg='blue')
