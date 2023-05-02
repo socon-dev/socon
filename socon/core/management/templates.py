@@ -12,7 +12,7 @@ from typing import Optional
 import socon
 
 from socon.core.management.base import BaseCommand, CommandError, Config
-from socon.utils.reshape import FileReshape
+from socon.utils.reshape import TemplateEngine
 from socon.utils.terminal import terminal
 from socon.utils.version import get_docs_version
 
@@ -70,7 +70,7 @@ class TemplateCommand(BaseCommand, abstract=True):
 
             for dirname in dirs[:]:
                 # Remove __pycache__ as it's possible that when we execute a template
-                # command we try to read its content with FileReshape. This might
+                # command we try to read its content with TemplateEngine. This might
                 # cause in the worst case a decode error.
                 if dirname == "__pycache__":
                     dirs.remove(dirname)
@@ -92,7 +92,7 @@ class TemplateCommand(BaseCommand, abstract=True):
                     )
 
                 # Render template files
-                template_file = FileReshape(old_path)
+                template_file = TemplateEngine(old_path)
                 template_file.render(context)
                 template_file.write(dest=new_path, encoding="utf-8")
 
