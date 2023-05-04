@@ -50,14 +50,14 @@ class CreateCommandCommand(TemplateCommand):
 
         # handle project name
         if project_name is not None:
-            if top_dir.joinpath("manage.py").exists():
+            if top_dir.joinpath(project_name, "setup.py").exists():
+                top_dir = top_dir.joinpath(project_name, project_name)
+            elif top_dir.joinpath(project_name, "plugins.py").exists():
+                top_dir = top_dir.joinpath(project_name)
+            elif top_dir.joinpath("manage.py").exists():
                 # Common directory
                 top_dir = top_dir.joinpath("projects", project_name)
             elif top_dir.name == "projects":
-                top_dir = top_dir.joinpath(project_name)
-            elif top_dir.joinpath(project_name, "setup.py").exists():
-                top_dir = top_dir.joinpath(project_name, project_name)
-            elif top_dir.joinpath(project_name, "plugins.py").exists():
                 top_dir = top_dir.joinpath(project_name)
             else:
                 raise CommandError(
@@ -78,15 +78,7 @@ class CreateCommandCommand(TemplateCommand):
                 if os.path.exists(settings_file):
                     common_module_name = os.path.dirname(settings_file)
                     break
-
-        if target.joinpath("manage.py").exists():
-            target = target.joinpath(common_module_name)
-        elif (
-            target.parent.name == "projects" and target.joinpath("projects.py").exists()
-        ):
-            # inside specific projects folder (thus no name needed)
-            pass
-        elif (
+        if (
             target.joinpath("setup.py").exists()
             and target.joinpath(target.name).exists()
         ):
@@ -94,6 +86,15 @@ class CreateCommandCommand(TemplateCommand):
             target = target.joinpath(target.name)
         elif target.joinpath("plugins.py").exists():
             # inside specific plugin folder (thus no name needed)
+            pass
+        elif target.joinpath("settings.py").exists():
+            pass
+        elif target.joinpath("manage.py").exists():
+            target = target.joinpath(common_module_name)
+        elif (
+            target.parent.name == "projects" and target.joinpath("projects.py").exists()
+        ):
+            # inside specific projects folder (thus no name needed)
             pass
         else:
             raise CommandError(
