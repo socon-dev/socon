@@ -382,6 +382,7 @@ class CommandTypesTests(AdminScriptTestCase):
             "is a project (P) subcommand. Add --project <label> to the arguments."
         ) in out
         assert "createcontainer (G)" in out
+        assert "createcommand (G)" in out
         assert "createproject (G)" in out
         assert "createplugin (G)" in out
 
@@ -884,6 +885,151 @@ class CreateProjectTests(AdminScriptTestCase):
             "already exists. Overlaying a project into an existing directory "
             "won't replace conflicting files."
         ) in err
+
+
+class CreateCommandTests(AdminScriptTestCase):
+    def _create_container(self, test_dir):
+        args = ["createcontainer", "testcontainer"]
+        testcontainer_dir = Path(test_dir, "testcontainer")
+        self.run_socon_admin(args, test_dir)
+        return testcontainer_dir
+
+    def _create_project(self, test_dir, project_name="artemis"):
+        args = ["createproject", "artemis"]
+        project_dir = Path(test_dir, "projects", "artemis")
+        self.run_socon_admin(args, test_dir)
+        return project_dir
+
+    def _create_plugin(self, test_dir, plugin_name="space_plugin"):
+        args = ["createplugin", plugin_name]
+        project_dir = Path(test_dir, plugin_name)
+        self.run_socon_admin(args, test_dir)
+        return project_dir
+
+    @pytest.mark.parametrize(
+        "bad_name", ["7launch", ".launch", "launch.py", "../launch"]
+    )
+    def test_invalid_target_name(self, bad_name, test_dir):
+        """Check that the command name is valid"""
+        container = self._create_container(test_dir)
+        _, err = self.run_socon_admin(
+            ["createcommand", bad_name, "--type", "project"], container
+        )
+        assert (
+            "CommandError: '{}' is not a valid projectcommand name. Please "
+            "make sure the name is a valid identifier.".format(bad_name)
+        ) in err
+
+    @pytest.mark.skip(reason="no way of currently testing this")
+    def test_create_command_in_projects_container(self, test_dir):
+        name = "launch"
+        project_name = "artemis"
+        container = self._create_container(test_dir)
+        project_dir = self._create_project(container, project_name)
+
+        # From root
+        _, err = self.run_socon_admin(
+            ["createcommand", name, "--type", "project", "--projectname", project_name],
+            container,
+        )
+        assert err == ""
+        path = project_dir.joinpath("management", "commands", name + ".py")
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+        # From root/projects
+        _, err = self.run_socon_admin(
+            ["createcommand", name, "--type", "project", "--projectname", project_name],
+            container.joinpath("projects"),
+        )
+        assert err == ""
+        path = project_dir.joinpath("management", "commands", name + ".py")
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+        # From root/projects/project_name
+        _, err = self.run_socon_admin(
+            ["createcommand", name, "--type", "project"], project_dir
+        )
+        assert err == ""
+        path = project_dir.joinpath("management", "commands", name + ".py")
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+    @pytest.mark.skip(reason="no way of currently testing this")
+    def test_create_command_in_projects_container_with_target(self, test_dir):
+        name = "launch"
+        project_name = "artemis"
+        container = self._create_container(test_dir)
+        project_dir = self._create_project(container, project_name)
+
+        # From root
+        _, err = self.run_socon_admin(
+            [
+                "createcommand",
+                name,
+                "--type",
+                "project",
+                "--target",
+                os.path.join("projects", project_name),
+            ],
+            container,
+        )
+        assert err == ""
+        path = project_dir.joinpath("management", "commands", name + ".py")
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+    def test_create_command_plugin_dir(self, test_dir):
+        name = "launch"
+        plugin_name = "space_plugin"
+        container = self._create_container(test_dir)
+        plugin_dir = self._create_plugin(container, plugin_name)
+
+        _, err = self.run_socon_admin(
+            ["createcommand", name, "--type", "project"], plugin_dir
+        )
+        # From top-level plugin folder (setup.py)
+        path = Path(plugin_dir).joinpath(
+            plugin_name, "management", "commands", name + ".py"
+        )
+        assert err == ""
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+        # From lowest-level plugin folder (plugins.py)
+        _, err = self.run_socon_admin(
+            ["createcommand", name, "--type", "project"],
+            plugin_dir.joinpath(plugin_name),
+        )
+        assert err == ""
+        assert path.exists()
+        os.remove(str(path.absolute()))
+
+    def test_create_command_plugin_with_target(self, test_dir):
+        name = "launch"
+        plugin_name = "space_plugin"
+        container = self._create_container(test_dir)
+        plugin_dir = self._create_plugin(container, plugin_name)
+
+        _, err = self.run_socon_admin(
+            [
+                "createcommand",
+                name,
+                "--type",
+                "project",
+                "--target",
+                os.path.join(plugin_name),
+            ],
+            container,
+        )
+        # From top-level plugin folder (setup.py)
+        path = Path(plugin_dir).joinpath(
+            plugin_name, "management", "commands", name + ".py"
+        )
+        assert err == ""
+        assert path.exists()
+        os.remove(str(path.absolute()))
 
 
 class CreatePluginTests(AdminScriptTestCase):

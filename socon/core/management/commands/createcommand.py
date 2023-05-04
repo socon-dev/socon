@@ -1,3 +1,5 @@
+import os
+
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Union
@@ -68,6 +70,15 @@ class CreateCommandCommand(TemplateCommand):
 
     def check_target_directory(self, target: str, name: str) -> Path:
         common_module_name = settings.get_settings_module_name()
+
+        if common_module_name is None:
+            # can occur in test environment
+            for dir in os.listdir():
+                settings_file = os.path.join(dir, "settings.py")
+                if os.path.exists(settings_file):
+                    common_module_name = os.path.dirname(settings_file)
+                    break
+
         if target.joinpath("manage.py").exists():
             target = target.joinpath(common_module_name)
         elif (
