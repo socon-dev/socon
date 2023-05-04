@@ -57,7 +57,7 @@ class TemplateCommand(BaseCommand, abstract=True):
             "docs_version": get_docs_version(),
             "socon_version": socon.__version__,
         }
-
+        print(context)
         template_dir = Path(socon.__path__[0], "conf", base_subdir)
 
         for root, dirs, files in os.walk(template_dir):
@@ -77,7 +77,10 @@ class TemplateCommand(BaseCommand, abstract=True):
 
             for filename in files:
                 old_path = Path(root, filename)
-                new_path = Path(top_dir, relative_dir, filename)
+                new_path = Path(
+                    top_dir, relative_dir, filename.replace(base_name, name)
+                )
+
                 for old_suffix, new_suffix in self.extensions:
                     if new_path.suffix == old_suffix:
                         new_path = new_path.with_suffix(new_suffix)
@@ -102,7 +105,7 @@ class TemplateCommand(BaseCommand, abstract=True):
 
     def check_target_directory(self, target: str, name: str) -> str:
         """
-        Chech that the target directory exist. If it does not, create it.
+        Check that the target directory exist. If it does not, create it.
         """
         if target is None:
             top_dir = Path.cwd().joinpath(name)
