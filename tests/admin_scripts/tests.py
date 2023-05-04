@@ -920,7 +920,6 @@ class CreateCommandTests(AdminScriptTestCase):
             "make sure the name is a valid identifier.".format(bad_name)
         ) in err
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     def test_create_command_in_projects_container(self, test_dir):
         name = "launch"
         project_name = "artemis"
@@ -956,7 +955,6 @@ class CreateCommandTests(AdminScriptTestCase):
         assert path.exists()
         os.remove(str(path.absolute()))
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     def test_create_command_in_projects_container_with_target(self, test_dir):
         name = "launch"
         project_name = "artemis"
