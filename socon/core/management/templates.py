@@ -57,7 +57,6 @@ class TemplateCommand(BaseCommand, abstract=True):
             "docs_version": get_docs_version(),
             "socon_version": socon.__version__,
         }
-        print(context)
         template_dir = Path(socon.__path__[0], "conf", base_subdir)
 
         for root, dirs, files in os.walk(template_dir):
