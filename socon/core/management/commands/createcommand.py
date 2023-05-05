@@ -11,8 +11,10 @@ from socon.core.management.templates import TemplateCommand
 
 class CreateCommandCommand(TemplateCommand):
     help: str = (
-        "Creates a Socon project or basecommand for a specific project"
-        "(or in the common folder if no project is specified)"
+        "Creates a Socon projectcommand or basecommand. "
+        "If called from the root \n it will create a common command. "
+        "If called from the root/projects folder --projectname can be defined to create a command inside a project folder. "
+        "If called from a plugin folder or inside a project folder --projectname is not needed."
     )
     missing_args_message: str = "You must provide a command name"
     template_prefix: str = "projectcommand"
@@ -22,9 +24,9 @@ class CreateCommandCommand(TemplateCommand):
         parser.add_argument(
             "--projectname",
             help=(
-                "Name of the project where the command is to be created, default is None referring to the common folder"
+                'Name of the project where the command is to be created, default is "None" referring to the common folder'
             ),
-            default=None,
+            default="None",
         )
         parser.add_argument(
             "--type",
@@ -44,60 +46,83 @@ class CreateCommandCommand(TemplateCommand):
 
         # handle target
         if target is None:
-            top_dir = Path.cwd()
+            target = Path(os.path.abspath(os.getcwd()))
         else:
-            top_dir = Path(target).expanduser().absolute()
+            # resolve ~, ..\ etc.
+            target = Path(os.path.abspath(os.path.expanduser(target)))
 
-        # handle project name
-        if project_name is not None:
-            if top_dir.joinpath(project_name, "setup.py").exists():
-                top_dir = top_dir.joinpath(project_name, project_name)
-            elif top_dir.joinpath(project_name, "plugins.py").exists():
-                top_dir = top_dir.joinpath(project_name)
-            elif top_dir.joinpath("manage.py").exists():
-                # Common directory
-                top_dir = top_dir.joinpath("projects", project_name)
-            elif top_dir.name == "projects":
-                top_dir = top_dir.joinpath(project_name)
+        # evaluate working directory and handle project name
+        if target.joinpath("setup.py").exists():
+            # Plugin parent folder
+            if project_name != "None":
+                target = target.joinpath(project_name)
             else:
+                target = target.joinpath(target.name)
+
+            if not target.exists():
                 raise CommandError(
-                    '--projectname "{:s}" could not be found in the target directory'.format(
-                        project_name
+                    "Looking for non-existing plugin folder {:s}".format(
+                        project_name if project_name != "None" else target.name
                     )
                 )
-
-        super().handle(config, command_name, top_dir)
-
-    def check_target_directory(self, target: str, name: str) -> Path:
-        common_module_name = settings.get_settings_module_name()
-
-        if common_module_name is None:
-            # can occur in test environment
-            for dir in os.listdir():
-                settings_file = os.path.join(dir, "settings.py")
-                if os.path.exists(settings_file):
-                    common_module_name = os.path.dirname(settings_file)
-                    break
-        if (
-            target.joinpath("setup.py").exists()
-            and target.joinpath(target.name).exists()
-        ):
-            # inside specific plugin parent folder (thus no name needed)
-            target = target.joinpath(target.name)
         elif target.joinpath("plugins.py").exists():
-            # inside specific plugin folder (thus no name needed)
-            pass
-        elif target.joinpath("settings.py").exists():
-            pass
+            # Plugin folder
+            if project_name != "None" and project_name != target.name:
+                raise CommandError(
+                    '--projectname "{:s}" given, but command called in pluginfolderc {:s}'.format(
+                        project_name, target.name
+                    )
+                )
         elif target.joinpath("manage.py").exists():
-            target = target.joinpath(common_module_name)
-        elif (
-            target.parent.name == "projects" and target.joinpath("projects.py").exists()
-        ):
-            # inside specific projects folder (thus no name needed)
-            pass
+            # Root directory
+            if project_name != "None":
+                # select project folder
+                target = target.joinpath("projects", project_name)
+
+                if not target.exists():
+                    raise CommandError(
+                        'Project "{:s}" could not be found'.format(project_name)
+                    )
+            else:
+                # select common folder
+                common_module_name = settings.get_settings_module_name()
+                if common_module_name is None:
+                    # can occur in test environment
+                    # (could also assume common folder to equal (target.name))
+                    for dir in os.listdir(target):
+                        settings_file = os.path.join(dir, "settings.py")
+                        if os.path.exists(settings_file):
+                            common_module_name = os.path.dirname(settings_file)
+                            break
+                target = target.joinpath(common_module_name)
+        elif target.name == "projects":
+            # projects folder
+            if project_name != "None":
+                target = target.joinpath(project_name)
+
+                if not target.exists():
+                    raise CommandError(
+                        'Project "{:s}" could not be found'.format(project_name)
+                    )
+            else:
+                raise CommandError(
+                    "--projectname should be specified when creating a command from the projects folder"
+                )
+        elif target.joinpath("projects.py").exists():
+            if project_name != "None" and target.name != project_name:
+                raise CommandError(
+                    '--projectname "{:s}" given, but command called inside the project {:s}'.format(
+                        project_name, target.name
+                    )
+                )
         else:
             raise CommandError(
-                "Can only create a projectcommand at the root of the container/ project/ plugin"
+                "Can only create a projectcommand at the root of the container/ project/ plugin, or inside the plugin/ project folder "
             )
+
+        super().handle(config, command_name, target)
+
+    def check_target_directory(self, target: str, name: str) -> Path:
+        if not Path(target).exists():
+            raise CommandError("Directory {:s} does not exist".format(target))
         return target
