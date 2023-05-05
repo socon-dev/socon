@@ -1,10 +1,7 @@
 from argparse import ArgumentParser
 
-from tutorial.management.commands.build import BuildCommand
-
-from socon.core.management.base import Config
-from socon.core.registry.base import ProjectConfig
-
+from socon.conf import settings
+from socon.core.management.base import BaseCommand, Config
 
 class {{ camel_case_basecommand_name }}Command(BaseCommand):
     """
@@ -22,14 +19,15 @@ class {{ camel_case_basecommand_name }}Command(BaseCommand):
     def handle(self, config: Config):
         try:
             # get common config variable
-            config_country = project_config.get_setting("COUNTRY")
-        except ValueError:
+            # should be defined in settings.py
+            config_country = settings.COUNTRY
+        except AttributeError:
             config_country = "undefined"
 
-        # get cli argument
+        # get optional cli argument
         info = config.getoption("info") # cli argument
 
-        print("Launching {:s} {:s}".format(
+        print("Launching {:s}{:s}".format(
             config_country,
-            ", " + info if info else ""
+            ", " + info if info else ", (no info)"
         ))
