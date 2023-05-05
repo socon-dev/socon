@@ -49,7 +49,7 @@ Socon core exception classes are defined in ``socon.core.exceptions``.
 
 .. exception:: ManagerNotFound
 
-    The :exc:`ManagerNotFound` is raised by :meth:`BaseManager.get_manager`
+    The :exc:`ManagerNotFound` is raised by :meth:`ManagerRegistry.get_manager`
     if the manager does not exist.
 
 ``HookNotFound``

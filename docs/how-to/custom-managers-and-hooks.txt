@@ -64,22 +64,23 @@ same time every :file:`managers.py`. The import registers every ``manager`` in t
 Access your managers
 --------------------
 
-You can access any manager using the :meth:`~socon.core.manager.BaseManager.get_manager`
-method. Here is an example to get the ``BuildManager`` manager. We
+You can access any manager by importing the ``socon.core.manager.managers`` object.
+``managers`` is an instance of :class:`~socon.core.manager.ManagerRegistry` class.
+Here is an example to get the ``BuildManager`` manager. We
 will pretend to have a ``build`` command that will access this manager.
 
 .. code-block:: python
     :caption: myframework/management/commands/build.py
 
     from socon.core.management.base import ProjectCommand
-    from socon.core.manager import BaseManager
+    from socon.core.manager import managers
 
 
     class BuildCommand(ProjectCommand):
         name = 'build'
 
     def handle(self, config, project_config):
-        manager = BaseManager.get_manager('build')
+        manager = managers.get_manager('build')
 
 Accessing your manager, will let you find, access and use your hooks.
 
@@ -180,7 +181,7 @@ and the name of the hook to search for. Here is a quick example:
         name = 'build'
 
     def handle(self, config, project_config):
-        manager = BaseManager.get_manager('build')
+        manager = managers.get_manager('build')
         manager.find_all()
         hook = manager.search_hook_impl(project_config, 'default_builder`)
         builder = hook()

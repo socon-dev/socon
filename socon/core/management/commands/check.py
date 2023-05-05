@@ -5,7 +5,7 @@ from traceback import TracebackException
 
 from socon.conf import settings
 from socon.core.management.base import BaseCommand, CommandError, Config
-from socon.core.manager import BaseManager
+from socon.core.manager import managers
 from socon.core.registry import projects, registry
 
 
@@ -48,7 +48,7 @@ class CheckCommand(BaseCommand):
         # Check that we can import all managers for each project.
         raised_issue = 0
         terminal.sep("-", "Managers check")
-        for manager in BaseManager.get_managers():
+        for manager in managers.get_managers():
             for registry_config in configs:
                 try:
                     manager.find_hooks_impl(registry_config)

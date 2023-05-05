@@ -165,14 +165,14 @@ For that we will modify the :file:`build.py` command in the common space.
 
     from socon.core.management.base import Config, ProjectCommand
     from socon.core.registry.base import ProjectConfig
-    from socon.core.manager.base import BaseManager
+    from socon.core.manager.base import managers
 
 
     class BuildCommand(ProjectCommand):
         name = 'build'
 
         def handle(self, config: Config, project_config: ProjectConfig):
-            manager = BaseManager.get_manager('spacecraft')
+            manager = managers.get_manager('spacecraft')
             manager.find_all()
             spacecrafts = manager.get_hooks(project_config)
             for spacecraft in spacecrafts:
