@@ -162,8 +162,8 @@ inside the projects folder, or inside a specific project/ plugin folder.
 
 Specifies the type of command to be generated
 
-* ``project`` means a projectcommand (default)
-* ``base`` means a basecommand
+* ``project`` generates a template for :class:`ProjectCommand` (default)
+* ``base`` generates a template for :class:`BaseCommand`
 
 
 .. socon-admin-option:: --projectname NAME
