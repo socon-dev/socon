@@ -12,7 +12,7 @@ from socon.core.management.templates import TemplateCommand
 class CreateCommandCommand(TemplateCommand):
     help: str = (
         "Creates a Socon projectcommand or basecommand. "
-        "If called from the root \n it will create a common command. "
+        "If called from the root it will create a common command. "
         "If called from the root/projects folder --projectname can be defined to create a command inside a project folder. "
         "If called from a plugin folder or inside a project folder --projectname is not needed."
     )

@@ -115,7 +115,7 @@ For example:
 ``createproject``
 -----------------
 
-.. socon-admin:: creatproject name
+.. socon-admin:: createproject name
 
 Create a Socon project directory structure for the given project name in the
 current directory under the ``projects`` directory.
@@ -147,6 +147,41 @@ For example:
 .. code-block:: console
 
     socon createproject myproject --target path/to/a/container
+
+``createcommand``
+-----------------
+
+.. socon-admin:: createcommand name
+
+Create a Socon command template, can be called from the root container,
+inside the projects folder, or inside a specific project/ plugin folder.
+
+
+.. socon-admin-option:: --type TYPE
+
+
+Specifies the type of command to be generated
+
+* ``project`` means a projectcommand (default)
+* ``base`` means a basecommand
+
+
+.. socon-admin-option:: --projectname NAME
+
+If called from the root container or from the projects folder,
+you need to specify ``--projectname`` to indicate to which project you want
+to add the command. This value is by default ``"None"`` which refers to the common
+folder if it is called from the root container.
+
+.. socon-admin-option:: --target TARGET
+
+Specify a destination directory
+
+For example:
+
+.. code-block:: console
+
+	python manage.py createcommand launch --type project --projectname artemis
 
 ``createplugin``
 ----------------
@@ -267,7 +302,7 @@ Examples::
 
       from socon.core.management import call_command
 
-      management.call_command('createcontainer', 'test', '--target=dir')
+      call_command('createcontainer', 'test', '--target=dir')
 
 The return value of the ``call_command()`` function is the same as the return
 value of the ``handle()`` method of the command.

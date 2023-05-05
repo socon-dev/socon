@@ -252,6 +252,7 @@ You should have the following output::
 
     [core]
 
+		createcommand (G)
         createcontainer (G)
         createplugin (G)
         createproject (G)
