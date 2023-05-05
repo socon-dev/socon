@@ -69,7 +69,7 @@ class CreateCommandCommand(TemplateCommand):
             # Plugin folder
             if project_name != "None" and project_name != target.name:
                 raise CommandError(
-                    '--projectname "{:s}" given, but command called in pluginfolderc {:s}'.format(
+                    '--projectname "{:s}" given, but command called in pluginfolder {:s}'.format(
                         project_name, target.name
                     )
                 )
@@ -111,13 +111,13 @@ class CreateCommandCommand(TemplateCommand):
         elif target.joinpath("projects.py").exists():
             if project_name != "None" and target.name != project_name:
                 raise CommandError(
-                    '--projectname "{:s}" given, but command called inside the project {:s}'.format(
+                    '--projectname "{:s}" given, but command called inside the project "{:s}"'.format(
                         project_name, target.name
                     )
                 )
         else:
             raise CommandError(
-                "Can only create a projectcommand at the root of the container/ project/ plugin, or inside the plugin/ project folder "
+                "Can only create a projectcommand at the root of the container/ project/ plugin, or inside the plugin/ project folder"
             )
 
         super().handle(config, command_name, target)
