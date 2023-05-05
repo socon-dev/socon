@@ -21,7 +21,7 @@ class {{ camel_case_projectcommand_name }}Command(ProjectCommand):
 
     def handle(self, config: Config, project_config: ProjectConfig):
         try:
-            # get commong config variable
+            # get common config variable
             config_country = project_config.get_setting("COUNTRY")
         except ValueError:
             config_country = "undefined"
