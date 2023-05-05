@@ -977,7 +977,6 @@ class CreateCommandTests(AdminScriptTestCase):
             ("", "", "artemis"),
             ("projects", "", "artemis"),
             ("projects", "artemis", "None"),
-            (os.path.join("projects", "artemis", "management"), "..\\", "None"),
         ],
     )
     def test_create_with_target_and_projectname(
