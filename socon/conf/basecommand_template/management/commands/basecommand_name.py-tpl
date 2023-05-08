@@ -27,7 +27,7 @@ class {{ camel_case_basecommand_name }}Command(BaseCommand):
         # get optional cli argument
         info = config.getoption("info") # cli argument
 
-        print("Launching {:s}{:s}".format(
+        print("Launching a rocket from {:s}{:s}".format(
             config_country,
             ", " + info if info else ", (no info)"
         ))
