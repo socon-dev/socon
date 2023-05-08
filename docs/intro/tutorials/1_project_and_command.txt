@@ -110,7 +110,7 @@ These files are:
 
 * :file:`artemis/management/config.py`: is the configuration file for the ``artemis`` project.
   This acts the same way as ``tutorial/settings.py`` but will only be visible for
-  this particular project. These settings can be anything suchs as the project name,
+  this particular project. These settings can be anything such as the project name,
   description, version, database credentials etc.
 
 * :file:`artemis/management/commands/`: The directory where all the project's commands are stored.
@@ -140,7 +140,7 @@ command. In Socon there are two types of commands.
   And must be must be called using  the :option:`--project` option.
 
 * :class:`BaseCommand <socon.core.management.BaseCommand>`: commands
-  can be decalred anywhere and are not specific to a certain project. These commands won't load any
+  can be declared anywhere and are not specific to a certain project. These commands won't load any
   :class:`~socon.core.registry.ProjectConfig`
 
 .. note::
