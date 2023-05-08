@@ -52,28 +52,7 @@ class CreateCommandCommand(TemplateCommand):
             target = Path(os.path.abspath(os.path.expanduser(target)))
 
         # evaluate working directory and handle project name
-        if target.joinpath("setup.py").exists():
-            # Plugin parent folder
-            if project_name != "None":
-                target = target.joinpath(project_name)
-            else:
-                target = target.joinpath(target.name)
-
-            if not target.exists():
-                raise CommandError(
-                    "Looking for non-existing plugin folder {:s}".format(
-                        project_name if project_name != "None" else target.name
-                    )
-                )
-        elif target.joinpath("plugins.py").exists():
-            # Plugin folder
-            if project_name != "None" and project_name != target.name:
-                raise CommandError(
-                    '--projectname "{:s}" given, but command called in pluginfolder {:s}'.format(
-                        project_name, target.name
-                    )
-                )
-        elif target.joinpath("manage.py").exists():
+        if target.joinpath("manage.py").exists():
             # Root directory
             if project_name != "None":
                 # select project folder
@@ -106,6 +85,27 @@ class CreateCommandCommand(TemplateCommand):
             else:
                 raise CommandError(
                     "--projectname should be specified when creating a command from the projects folder"
+                )
+        elif target.joinpath("setup.py").exists():
+            # Plugin parent folder
+            if project_name != "None":
+                target = target.joinpath(project_name)
+            else:
+                target = target.joinpath(target.name)
+
+            if not target.exists():
+                raise CommandError(
+                    "Looking for non-existing plugin folder {:s}".format(
+                        project_name if project_name != "None" else target.name
+                    )
+                )
+        elif target.joinpath("plugins.py").exists():
+            # Plugin folder
+            if project_name != "None" and project_name != target.name:
+                raise CommandError(
+                    '--projectname "{:s}" given, but command called in pluginfolder {:s}'.format(
+                        project_name, target.name
+                    )
                 )
         elif target.joinpath("projects.py").exists():
             if project_name != "None" and target.name != project_name:
