@@ -48,7 +48,7 @@ to change their behaviors by adding or removing functionalities.
 
 The framework also provide features like managers and hooks. These features will
 allow you to increase the functionalities of your framework while maintaining
-genericity accross your different projects.
+genericity across your different projects.
 
 Documentation
 =============
@@ -151,14 +151,14 @@ License
 =======
 
 Copyright Stephane Capponi and others, 2023
-Distributed under the terms of the BSD-3-Clause license, socon is free and
+Distributed under the terms of the BSD-3-Clause license, Socon is free and
 open source software.
 
-Socon also reused codes from third-paty. You can find the licenses of these
-third-paty in the `licenses`_ folder. Each files that has been reused and
+Socon also reused codes from third-party. You can find the licenses of these
+third-party in the `licenses`_ folder. Each files that has been reused and
 modified contains an SPDX section to specify the license used and the Copyright.
-If you want more information about our licence and why we reused code
-from third-paty, check the ``docs/intro/overview.txt``
+If you want more information about our license and why we reused code
+from third-party, check the ``docs/intro/overview.txt``
 
 .. _licenses: https://github.com/socon-dev/socon/tree/master/licenses
 .. _GitHub: https://github.com/socon-dev/socon/
