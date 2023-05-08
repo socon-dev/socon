@@ -86,9 +86,8 @@ class CreateCommandCommand(TemplateCommand):
             else:
                 # select common folder
                 common_module_name = settings.get_settings_module_name()
-                if common_module_name is None:
-                    # can occur in test environment
-                    # (could also assume common folder to equal (target.name))
+                if common_module_name is None:  # pragma: no cover
+                    # Always True in test environment
                     for dir in os.listdir(target):
                         settings_file = os.path.join(dir, "settings.py")
                         if os.path.exists(settings_file):
@@ -123,6 +122,4 @@ class CreateCommandCommand(TemplateCommand):
         super().handle(config, command_name, target)
 
     def check_target_directory(self, target: str, name: str) -> Path:
-        if not Path(target).exists():
-            raise CommandError("Directory {:s} does not exist".format(target))
         return target

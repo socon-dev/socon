@@ -1037,19 +1037,6 @@ class CreateCommandTests(AdminScriptTestCase):
             in err
         )
 
-    def test_nonexisting_project_name(self, test_dir):
-        """check that an error is given in projects folder when a non-existing projectname is specified"""
-        name = "launch"
-        project_name = "artemis"
-        container = self._create_container(test_dir)
-        _ = self._create_project(container, project_name)
-
-        _, err = self.run_socon_admin(
-            ["createcommand", name, "--type", "project", "--projectname", "apollo"],
-            container.joinpath("projects"),
-        )
-        assert 'Project "{:s}" could not be found'.format("apollo") in err
-
     def test_wrong_project_name(self, test_dir):
         """check that an error is given in project folder with another specified projectname"""
         name = "launch"
@@ -1109,6 +1096,28 @@ class CreateCommandTests(AdminScriptTestCase):
             plugin_dir,
         )
         assert ("Looking for non-existing plugin folder {:s}".format("artemis")) in err
+
+    @pytest.mark.parametrize("base_dir", ["", "projects"])
+    def test_nonexisting_project_name(self, base_dir, test_dir):
+        """check that an error is given in projects folder when a non-existing projectname is specified"""
+        name = "launch"
+        project_name = "artemis"
+        wrong_project_name = "apollo"
+        container = self._create_container(test_dir)
+        _ = self._create_project(container, project_name)
+
+        _, err = self.run_socon_admin(
+            [
+                "createcommand",
+                name,
+                "--type",
+                "project",
+                "--projectname",
+                wrong_project_name,
+            ],
+            container.joinpath(base_dir),
+        )
+        assert 'Project "{:s}" could not be found'.format(wrong_project_name) in err
 
 
 class CreatePluginTests(AdminScriptTestCase):

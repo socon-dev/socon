@@ -10,3 +10,4 @@ directory = coverage
 exclude_lines =
     if TYPE_CHECKING:
     if dirname == "__pycache__":
+	pragma: no cover
