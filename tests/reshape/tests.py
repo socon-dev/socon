@@ -6,8 +6,6 @@ from socon.utils.reshape import TemplateEngine
 @pytest.fixture()
 def example(datafix_dir) -> TemplateEngine:
     reshape_file = TemplateEngine(datafix_dir / "example.txt")
-    print("-" * 1000)
-    print(datafix_dir)
     yield reshape_file
     reshape_file.revert_modif()
 

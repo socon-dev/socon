@@ -31,7 +31,7 @@ Using of the above commands will create a folder ``tutorial``
 
 .. warning::
 
-    To avoid any kind of issue, do not name your folder similar to any of
+    To avoid any kind of issue, do not name your folder the same as any of
     the built-in Python or Socon components.
 
 .. note::
@@ -120,12 +120,12 @@ Register your project
 
 Finally you have to register your project in ``tutorial/settings.py``, allowing Socon to
 see your project and all of its commands. You can find more about the settings :doc:`here </ref/settings>`.
-Register your project by adding :option:'projects.artemis' to ``INSTALLED_PROJECTS``:
+Register your project by adding "projects.artemis" to ``INSTALLED_PROJECTS``:
 
 .. code-block:: python
 
     INSTALLED_PROJECTS = [
-        'projects.artemis'
+        "projects.artemis"
     ]
 
 
@@ -153,7 +153,7 @@ Creating the launch command
 -----------------------------
 
 It is possible to create a command either through the command line or by manually creating a file in any :file:`commands/` folder.
-We will create a projectcommand called ```launch`` for the ``artemis`` project using the command line, with the use of ``createcommand``.
+We will create a projectcommand called ``launch`` for the ``artemis`` project using the command line, with the use of ``createcommand``.
 
 .. code-block:: console
 
@@ -167,7 +167,7 @@ We will create a projectcommand called ```launch`` for the ``artemis`` project u
 .. note::
 
     This uses the argument ``--projectname`` given to the ``createcommand``.
-    Using :option:'--project artemis' would result in socon looking for a command
+    Using ``--project artemi`` would result in socon looking for a command
     named ``createcommand`` in the ``artemis`` project.
 
 You should have something looking like this in the overall project::
@@ -269,12 +269,12 @@ Opening the ``launch.py`` shows us the following.
             Projectcommand launch.py generated
             using Socon 0.1.
         """
-        name = 'launch'
+        name = "launch"
 
         def add_arguments(self, parser: ArgumentParser) -> None:
             super().add_arguments(parser)
             parser.add_argument(
-                '--info', help='Add info to the handle command'
+                "--info", help="Add info to the handle command"
             )
 
         def handle(self, config: Config, project_config: ProjectConfig):
@@ -304,7 +304,7 @@ Opening the ``launch.py`` shows us the following.
 
 :class:`LaunchCommand` is a subclass of :class:`ProjectCommand`.
 The :attr:`~socon.core.management.BaseCommand.name` attribute defines the name of the command.
-If no name is defined Socon uses the name of the class before ```Command`` in lower case.
+If no name is defined Socon uses the name of the class before ``Command`` in lower case.
 Which mean its name would have been the same as the one we have defined above.
 
 The :meth:`~socon.core.management.ProjectCommand.handle` method must be
@@ -324,7 +324,7 @@ Imagine that you want to add an argument to your command through the command lin
 an easy way to do that using the :meth:`~socon.core.management.BaseCommand.add_arguments`.
 For the :class:`LaunchCommand` the ``--info`` argument is already implemented.
 
-The ``--info`` argument, shows up when calling ```--help`` on ``launch`` from the command line.
+The ``--info`` argument, shows up when calling ``--help`` on ``launch`` from the command line.
 
 .. code-block:: console
 
@@ -537,7 +537,7 @@ For this example modify :file:`deploy.py`, to:
 
 
     class DeployCommand(BaseCommand):
-        name = 'deploy'
+        name = "deploy"
 
         def handle(self, config: Config):
             print("Deploy satellites and other payloads")
@@ -551,7 +551,7 @@ And additionally modify :file:`build.py`, to:
 
 
     class BuildCommand(ProjectCommand):
-        name = 'build'
+        name = "build"
 
         def handle(self, config: Config, project_config: ProjectConfig):
             print("Building {:s}".project_config.get_setting('SPACECRAFT'))

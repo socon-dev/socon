@@ -10,12 +10,12 @@ class {{ camel_case_projectcommand_name }}Command(ProjectCommand):
         Projectcommand {{ projectcommand_name }}.py generated
         using Socon {{ socon_version }}.
     """
-    name = '{{ projectcommand_name }}'
+    name = "{{ projectcommand_name }}"
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         super().add_arguments(parser)
         parser.add_argument(
-            '--info', help='Add info to the handle command'
+            "--info", help="Add info to the handle command"
         )
 
     def handle(self, config: Config, project_config: ProjectConfig):

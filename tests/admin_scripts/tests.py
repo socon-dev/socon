@@ -869,7 +869,7 @@ class CreateProjectTests(AdminScriptTestCase):
         ids=["root", "projects-root", "new-project"],
     )
     def test_create_project_with_valid_target(self, test_dir, target):
-        """Check that the taget point to a valid target. (A container)"""
+        """Check that the target points to a valid directory. (A container)"""
         container = self._create_container(test_dir)
 
         # target point to the root container
@@ -925,7 +925,6 @@ class CreateCommandTests(AdminScriptTestCase):
         assert err == ""
         path = project_dir.joinpath("management", "commands", name + ".py")
         assert path.exists()
-        os.remove(str(path.absolute()))
 
     def test_create_in_common(self, test_dir):
         """check that the command is created in the common directory"""
@@ -942,7 +941,6 @@ class CreateCommandTests(AdminScriptTestCase):
             "testcontainer", "management", "commands", name + ".py"
         )
         assert path.exists()
-        os.remove(str(path.absolute()))
 
     @pytest.mark.parametrize(
         "base_dir",
@@ -967,7 +965,6 @@ class CreateCommandTests(AdminScriptTestCase):
         )
         assert err == ""
         assert path.exists()
-        os.remove(str(path.absolute()))
 
     @pytest.mark.parametrize(
         "base_dir, target, project_name",
@@ -1005,7 +1002,6 @@ class CreateCommandTests(AdminScriptTestCase):
         path = Path(project_dir).joinpath("management", "commands", name + ".py")
         assert err == ""
         assert path.exists()
-        os.remove(str(path.absolute()))
 
     @pytest.mark.parametrize(
         "bad_name", ["7launch", ".launch", "launch.py", "../launch"]
@@ -1017,7 +1013,7 @@ class CreateCommandTests(AdminScriptTestCase):
             ["createcommand", bad_name, "--type", "project"], container
         )
         assert (
-            "CommandError: '{}' is not a valid projectcommand name. Please "
+            "CommandError: '{:s}' is not a valid projectcommand name. Please "
             "make sure the name is a valid identifier.".format(bad_name)
         ) in err
 
@@ -1049,7 +1045,7 @@ class CreateCommandTests(AdminScriptTestCase):
             project_dir2,
         )
         assert (
-            '--projectname "{:s}" given, but command called inside the project "{:s}"'.format(
+            "--projectname '{:s}' given, but command called inside the project '{:s}'".format(
                 "artemis", "apollo"
             )
             in err
@@ -1070,7 +1066,7 @@ class CreateCommandTests(AdminScriptTestCase):
         ) in err
 
     def test_wrong_pluginname(self, test_dir):
-        """check that an error is given in project folder with another specified projectname"""
+        """check that an error is given in project folder (e.g. artemis) with another specified projectname"""
         name = "launch"
         container = self._create_container(test_dir)
         plugin_dir = self._create_plugin(container, "space_plugin")
@@ -1080,7 +1076,7 @@ class CreateCommandTests(AdminScriptTestCase):
             plugin_dir.joinpath("space_plugin"),
         )
         assert (
-            '--projectname "{:s}" given, but command called in pluginfolder {:s}'.format(
+            "--projectname '{:s}' given, but command called in pluginfolder '{:s}'".format(
                 "artemis", "space_plugin"
             )
         ) in err
@@ -1095,7 +1091,9 @@ class CreateCommandTests(AdminScriptTestCase):
             ["createcommand", name, "--type", "project", "--projectname", "artemis"],
             plugin_dir,
         )
-        assert ("Looking for non-existing plugin folder {:s}".format("artemis")) in err
+        assert (
+            "Looking for non-existing plugin folder '{:s}'".format("artemis")
+        ) in err
 
     @pytest.mark.parametrize("base_dir", ["", "projects"])
     def test_nonexisting_project_name(self, base_dir, test_dir):
@@ -1117,7 +1115,7 @@ class CreateCommandTests(AdminScriptTestCase):
             ],
             container.joinpath(base_dir),
         )
-        assert 'Project "{:s}" could not be found'.format(wrong_project_name) in err
+        assert "Project '{:s}' could not be found".format(wrong_project_name) in err
 
 
 class CreatePluginTests(AdminScriptTestCase):
@@ -1151,7 +1149,7 @@ class CreatePluginTests(AdminScriptTestCase):
 
 
 class ManagerCheckTests(AdminScriptTestCase):
-    def test_settings_not_configugure(self, test_dir):
+    def test_settings_not_configure(self, test_dir):
         """Check output when settings are not configured"""
         args = ["check"]
         out, err = self.run_socon_admin(args, test_dir)

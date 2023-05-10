@@ -184,7 +184,7 @@ class SettingsTests:
         assert test_settings.TEST == "a"
 
     def test_delattr_settings_not_ready(self):
-        """Check taht _setup() is called when we delete an attribute"""
+        """Check that _setup() is called when we delete an attribute"""
         test_settings = CoreSettings()
         with pytest.raises(AttributeError):
             del test_settings.TEST

@@ -13,7 +13,7 @@ class CreateCommandCommand(TemplateCommand):
     help: str = (
         "Creates a Socon projectcommand or basecommand. "
         "If called from the root it will create a common command. "
-        "If called from the root/projects folder --projectname can be defined to create a command inside a project folder. "
+        "If called from the root/projects folder --projectname can be defined to create a command inside a project. "
         "If called from a plugin folder or inside a project folder --projectname is not needed."
     )
     missing_args_message: str = "You must provide a command name"
@@ -24,7 +24,7 @@ class CreateCommandCommand(TemplateCommand):
         parser.add_argument(
             "--projectname",
             help=(
-                'Name of the project where the command is to be created, default is "None" referring to the common folder'
+                "Name of the project where the command is to be created, default is 'None' referring to the common folder"
             ),
             default="None",
         )
@@ -52,28 +52,7 @@ class CreateCommandCommand(TemplateCommand):
             target = Path(os.path.abspath(os.path.expanduser(target)))
 
         # evaluate working directory and handle project name
-        if target.joinpath("setup.py").exists():
-            # Plugin parent folder
-            if project_name != "None":
-                target = target.joinpath(project_name)
-            else:
-                target = target.joinpath(target.name)
-
-            if not target.exists():
-                raise CommandError(
-                    "Looking for non-existing plugin folder {:s}".format(
-                        project_name if project_name != "None" else target.name
-                    )
-                )
-        elif target.joinpath("plugins.py").exists():
-            # Plugin folder
-            if project_name != "None" and project_name != target.name:
-                raise CommandError(
-                    '--projectname "{:s}" given, but command called in pluginfolder {:s}'.format(
-                        project_name, target.name
-                    )
-                )
-        elif target.joinpath("manage.py").exists():
+        if target.joinpath("manage.py").exists():
             # Root directory
             if project_name != "None":
                 # select project folder
@@ -81,7 +60,7 @@ class CreateCommandCommand(TemplateCommand):
 
                 if not target.exists():
                     raise CommandError(
-                        'Project "{:s}" could not be found'.format(project_name)
+                        "Project '{:s}' could not be found".format(project_name)
                     )
             else:
                 # select common folder
@@ -101,16 +80,37 @@ class CreateCommandCommand(TemplateCommand):
 
                 if not target.exists():
                     raise CommandError(
-                        'Project "{:s}" could not be found'.format(project_name)
+                        " Project '{:s}' could not be found".format(project_name)
                     )
             else:
                 raise CommandError(
                     "--projectname should be specified when creating a command from the projects folder"
                 )
+        elif target.joinpath("setup.py").exists():
+            # Plugin parent folder
+            if project_name != "None":
+                target = target.joinpath(project_name)
+            else:
+                target = target.joinpath(target.name)
+
+            if not target.exists():
+                raise CommandError(
+                    "Looking for non-existing plugin folder '{:s}'".format(
+                        project_name if project_name != "None" else target.name
+                    )
+                )
+        elif target.joinpath("plugins.py").exists():
+            # Plugin folder
+            if project_name != "None" and project_name != target.name:
+                raise CommandError(
+                    "--projectname '{:s}' given, but command called in pluginfolder '{:s}'".format(
+                        project_name, target.name
+                    )
+                )
         elif target.joinpath("projects.py").exists():
             if project_name != "None" and target.name != project_name:
                 raise CommandError(
-                    '--projectname "{:s}" given, but command called inside the project "{:s}"'.format(
+                    "--projectname '{:s}' given, but command called inside the project '{:s}'".format(
                         project_name, target.name
                     )
                 )
