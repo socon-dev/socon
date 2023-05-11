@@ -8,7 +8,7 @@ from socon.core.exceptions import (
     ManagerNotFound,
     ManagerNotHooked,
 )
-from socon.core.manager import BaseManager
+from socon.core.manager import managers
 from socon.core.registry import projects
 from socon.test import override_settings
 
@@ -20,7 +20,7 @@ def manager_config():
 
 @pytest.fixture(scope="class")
 def default_reg():
-    default_registry = BaseManager.get_manager("default")
+    default_registry = managers.get_manager("default")
     yield default_registry
 
 
@@ -70,7 +70,7 @@ class RegistryManagerTests:
 
     def test_get_manager(self):
         """Get an imported manager from a registry config"""
-        default_manager = BaseManager.get_manager("default")
+        default_manager = managers.get_manager("default")
         assert default_manager is not None
         assert default_manager.name == "default"
 
@@ -79,7 +79,7 @@ class RegistryManagerTests:
         # By default the manager is not linked
         msg = "'not_hooked_manager' does not contain any hooks implementation"
         with override_settings(INSTALLED_PROJECTS=["manager.manager_not_hooked"]):
-            default_manager = BaseManager.get_manager("not_hooked_manager")
+            default_manager = managers.get_manager("not_hooked_manager")
             with pytest.raises(ManagerNotHooked, match=msg):
                 default_manager.is_hooked()
             import_module("manager.manager_not_hooked.not_hooked")
@@ -153,4 +153,4 @@ class RegistryManagerTests:
         """Try to get a manager that does not exist"""
         msg = "'not_exist' does not exist. Choices are:"
         with pytest.raises(ManagerNotFound, match="{}*".format(msg)):
-            BaseManager.get_manager("not_exist")
+            managers.get_manager("not_exist")

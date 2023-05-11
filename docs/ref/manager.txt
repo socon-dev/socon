@@ -9,6 +9,30 @@ on how to use them and how to write your own managers and hooks,
 see :doc:`custom managers and hooks </how-to/custom-managers-and-hooks>`.
 You can also find a tutorial about managers and hooks :doc:`here </intro/tutorials/2_change_behavior>`.
 
+Manager Registry
+================
+
+.. class:: ManagerRegistry
+
+    Base class that stores all the managers. At the start Socon creates a
+    ``managers`` object that is accessible like this::
+
+        from socon.core.manager import managers
+
+    Use this at all time when you want to access a manager.
+
+Methods
+-------
+
+.. method:: ManagerRegistry.get_manager(name: str)
+
+    Return the manager with the given name or raise a
+    :exc:`socon.core.exceptions.ManagerNotFound` exception
+
+.. method:: ManagerRegistry.get_managers()
+
+    Return all registered managers.
+
 Manager objects
 ===============
 
@@ -42,18 +66,6 @@ Configurable attributes
 .. attribute:: BaseManager.lookup_module
 
     Name of the module the manager will into to import hooks.
-
-Class methods
--------------
-
-.. method:: BaseManager.get_manager(name: str)
-
-    Return the manager with the given name or raise a
-    :exc:`socon.core.exceptions.ManagerNotFound` exception
-
-.. method:: BaseManager.get_managers()
-
-    Return all registered managers.
 
 Methods
 -------

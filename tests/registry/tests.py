@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from socon.core.exceptions import ImproperlyConfigured, RegistryNotReady
-from socon.core.manager import BaseManager
+from socon.core.manager import managers
 from socon.core.registry import projects, registry
 from socon.core.registry.base import BaseRegistry
 from socon.core.registry.config import ProjectConfig, RegistryConfig
@@ -261,7 +261,7 @@ class ProjectsTests:
     @override_settings(INSTALLED_PROJECTS=["registry.config_with_manager"])
     def test_register_registry_manager(self):
         """Check that we correctly register managers on registry config import"""
-        manager = BaseManager.get_manager("test_manager")
+        manager = managers.get_manager("test_manager")
         assert manager is not None
 
 

@@ -82,7 +82,7 @@ The code for :file:`count.py`:
 
 .. code-block:: python
 
-    from socon.core.manager.base import BaseManager
+    from socon.core.manager.base import managers
     from socon.core.management.base import BaseCommand, Config
     from socon.core.registry import projects
 
@@ -92,7 +92,7 @@ The code for :file:`count.py`:
 
         def handle(self, config: Config) -> None:
             # Get the spacecraft manager and find all hooks across the framework
-            manager = BaseManager.get_manager('spacecraft')
+            manager = managers.get_manager('spacecraft')
             manager.find_all()
 
             # Iterate over all project configuration and get all spacecrafts

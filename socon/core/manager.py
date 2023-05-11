@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from importlib import import_module
-from typing import TYPE_CHECKING, Any, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, Union
 
 from socon.conf import settings
 from socon.core.exceptions import (
@@ -19,6 +19,45 @@ from socon.core.registry import registry
 if TYPE_CHECKING:
     from socon.core.registry.config import RegistryConfig
 
+
+__all__ = ["managers", "BaseManager", "Hook"]
+
+
+class ManagerRegistry:
+    """Base class that registers all managers"""
+
+    def __init__(self) -> None:
+        self.managers: Dict[str, Type[BaseManager]] = {}
+
+    def get_manager(self, name: str) -> Type[BaseManager]:
+        """Return the manager with the given name"""
+        try:
+            return self.managers[name]
+        except KeyError:
+            raise ManagerNotFound(
+                "'{}' does not exist. Choices are:\n{}".format(
+                    name, list(self.managers.keys())
+                )
+            )
+
+    def get_managers(self) -> list[Type[BaseManager]]:
+        """Return a list of all defined managers"""
+        return self.managers.values()
+
+    def add_manager(self, manager: Type[BaseManager]):
+        """Add a manager to the registry"""
+        name = manager.name
+        if name in self.managers:
+            raise ImproperlyConfigured(
+                "Manager names aren't unique. Duplicates:\n{}".format(name)
+            )
+        self.managers[name] = manager
+
+
+# Declared here to avoid import recursion. As Hook and BaseManager
+# depend on the registry, putting them in different files increase the
+# import complexity.
+managers = ManagerRegistry()
 
 # -------------------------------- Base class -------------------------------- #
 
@@ -50,7 +89,7 @@ class Hook:
             )
 
         # Get the manager for this hook
-        _manager = BaseManager.get_manager(cls.manager)
+        manager = managers.get_manager(cls.manager)
 
         # Start registering the subclass to the main registry. First required
         # things is to find the registry config that hold the subclass
@@ -66,7 +105,7 @@ class Hook:
                 )
             )
 
-        _manager.add_hook_impl(config, cls)
+        manager.add_hook_impl(config, cls)
 
 
 class BaseManager:
@@ -84,9 +123,6 @@ class BaseManager:
     When a manager is defined, it requires to be hooked to a Hook subclass.
     """
 
-    # Internal registry for available managers
-    _managers = {}
-
     # Name of the manager
     name: str = None
 
@@ -98,20 +134,12 @@ class BaseManager:
         self._imported_configs = []
 
     def __init_subclass__(cls, name: str = None, lookup: str = None) -> None:
-        name = cls._get_mandatory_attr("name", name)
-        lookup_module = cls._get_mandatory_attr("lookup_module", lookup)
-
-        if name in cls._managers:
-            raise ImproperlyConfigured(
-                "Manager names aren't unique. Duplicates:\n{}".format(name)
-            )
-
-        # Set the mandatory attribute to the class
-        cls.name = name
-        cls.lookup_module = lookup_module
+        # Check the manadatory attributes
+        cls.name = cls._get_mandatory_attr("name", name)
+        cls.lookup_module = cls._get_mandatory_attr("lookup_module", lookup)
 
         # Register the manager in the managers registry
-        cls._managers[name] = cls()
+        managers.add_manager(cls())
 
     @classmethod
     def _get_mandatory_attr(cls, attr: str, default: Any = None) -> Any:
@@ -122,23 +150,6 @@ class BaseManager:
                 "'{}' must supply a {} attribute".format(cls.__name__, attr)
             )
         return value
-
-    @classmethod
-    def get_manager(cls, name: str) -> Type[BaseManager]:
-        """Return the manager with the given name"""
-        try:
-            return cls._managers[name]
-        except KeyError:
-            raise ManagerNotFound(
-                "'{}' does not exist. Choices are:\n{}".format(
-                    name, list(cls._managers.keys())
-                )
-            )
-
-    @classmethod
-    def get_managers(self) -> list[Type[BaseManager]]:
-        """Return a list of all defined managers"""
-        return self._managers.values()
 
     def is_hooked(self) -> None:
         """Raise an exception if the manager does not contain any hooks"""

@@ -165,23 +165,24 @@ For that we will modify the :file:`build.py` command in the common space.
 
     from socon.core.management.base import Config, ProjectCommand
     from socon.core.registry.base import ProjectConfig
-    from socon.core.manager.base import BaseManager
+    from socon.core.manager.base import managers
 
 
     class BuildCommand(ProjectCommand):
         name = 'build'
 
         def handle(self, config: Config, project_config: ProjectConfig):
-            manager = BaseManager.get_manager('spacecraft')
+            manager = managers.get_manager('spacecraft')
             manager.find_all()
             spacecrafts = manager.get_hooks(project_config)
             for spacecraft in spacecrafts:
                 print(f"Building {spacecraft()}")
 
 This get's a bit more complicated but no worries we will explain everything.
-First off all, we will need the :class:`~socon.core.manager.BaseManager` class
-to get access to all the managers. It's that class that keeps a record of all
-managers Socon or the user have declared.
+First off all, we will need to import :obj:`socon.core.manager.managers` object
+to get access to all the managers. It's that object that keeps a record of all
+managers Socon or the user have declared. This object is an instance of the
+:class:`~Socon.core.manager.ManagerRegistry` class.
 
 * :meth:`~socon.core.manager.get_manager`: To access this manager we will use
   the :meth:`~socon.core.manager.get_manager` method by specifying the name of

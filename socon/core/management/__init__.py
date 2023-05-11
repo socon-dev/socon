@@ -19,7 +19,7 @@ from socon.core.management.base import (
     CommandParser,
     handle_default_options,
 )
-from socon.core.manager import BaseManager
+from socon.core.manager import managers
 from socon.core.registry import projects
 from socon.utils.func import set_env
 from socon.utils.terminal import terminal
@@ -35,7 +35,7 @@ def get_commands() -> CommandManager:
     config. This mean the core registry config, the common config of the user
     and every projects and plugins. Core commands are always included.
     """
-    command_manager = BaseManager.get_manager("commands")
+    command_manager = managers.get_manager("commands")
     return command_manager.find_all()
 
 
