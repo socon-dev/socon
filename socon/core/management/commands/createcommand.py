@@ -65,13 +65,6 @@ class CreateCommandCommand(TemplateCommand):
             else:
                 # select common folder
                 common_module_name = settings.get_settings_module_name()
-                if common_module_name is None:  # pragma: no cover
-                    # Always True in test environment
-                    for dir in os.listdir(target):
-                        settings_file = os.path.join(dir, "settings.py")
-                        if os.path.exists(settings_file):
-                            common_module_name = os.path.dirname(settings_file)
-                            break
                 target = target.joinpath(common_module_name)
         elif target.name == "projects":
             # projects folder
