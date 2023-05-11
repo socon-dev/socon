@@ -3,9 +3,9 @@ Create your first projects and commands
 =======================================
 
 Welcome to the first tutorial. This tutorial will walk you through the
-creation of a container that will hold all your projects. We will create
-one project using socon admin command and we will create commands for that
-specific project.
+creation of your first project, the different types of commands and
+how to use general, and project-specific configuration files.
+
 
 Install Socon
 =============
@@ -16,22 +16,16 @@ Creating a container
 ====================
 
 To start with Socon, we will have to take care of some initial setup. The first
-thing to do is to create a Socon container -- a collection of settings that
-include Socon-specific options, project-specific settings, environment configuration
-and many others.
-
-Before anything else, use ``cd`` to get inside a folder where you want your
-code to be stored. Then:
+thing to do is to generate the layout of your Socon projects -- the Socon container.
+To do this you can call the command ``createcontainer`` from the command line:
 
 .. code-block:: console
 
     $ socon createcontainer tutorial
 
-Using of the above commands will create a folder ``tutorial``
-
 .. warning::
 
-    To avoid any kind of issue, do not name your folder the same as any of
+    To avoid any kind of issue, do not name your container the same as any of
     the built-in Python or Socon components.
 
 .. note::
@@ -77,18 +71,13 @@ At this point you cannot really interact with Socon as you haven't yet
 registered a project. To do so, we will need to create one project and register it
 in the global settings (:file:`/settings.py`).
 
-Socon comes with admin commands that help to automatically
-generate the basic directory structure of a project, so that you can focus
-on writing code and not on creating files.
-
-In this tutorial, we'll create our first project in the ``projects`` directory.
-To create your project, be sure to be in the ``tutorial`` root directory.
+To create your project, be sure to be in the ``tutorial`` root directory and call:
 
 .. code-block:: console
 
     $ python manage.py createproject artemis
 
-Now that we have created a project, the directory structure should look like this::
+Now that we have created a project, the directory structure inside :file:`artemis/` should look like this::
 
     artemis/
         __init__.py
@@ -110,8 +99,8 @@ These files are:
 
 * :file:`artemis/management/config.py`: is the configuration file for the ``artemis`` project.
   This acts the same way as ``tutorial/settings.py`` but will only be visible for
-  this particular project. These settings can be anything such as the project name,
-  description, version, database credentials etc.
+  this particular project. These settings can be anything ranging from the project name,
+  description, version to database credentials etc.
 
 * :file:`artemis/management/commands/`: The directory where all the project's commands are stored.
 
@@ -130,10 +119,10 @@ Register your project by adding "projects.artemis" to ``INSTALLED_PROJECTS``:
 
 
 Registering your first command
-=================================
+==============================
 
 Now that you have created your first project, you can create your first
-command. In Socon there are two types of commands.
+command. In Socon there are two types of commands:
 
 * :class:`ProjectCommand <socon.core.management.ProjectCommand>`: commands
   that will load a :class:`ProjectConfig <socon.core.registry.base.ProjectConfig>`.
@@ -150,7 +139,7 @@ command. In Socon there are two types of commands.
 
 
 Creating the launch command
------------------------------
+---------------------------
 
 It is possible to create a command either through the command line or by manually creating a file in any :file:`commands/` folder.
 We will create a projectcommand called ``launch`` for the ``artemis`` project using the command line, with the use of ``createcommand``.
@@ -190,7 +179,7 @@ You should have something looking like this in the overall project::
 Check your helper
 -----------------
 
-Before running our command we can quickly check that the command has been well
+Before running your command we can quickly check that the command has been
 registered by running the help command:
 
 .. code-block:: console
@@ -251,7 +240,7 @@ Let's first analyze ``launch.py`` shortly.
 
 
 Analyzing the command
--------------------------
+---------------------
 
 Opening the ``launch.py`` shows us the following.
 
@@ -308,17 +297,17 @@ If no name is defined Socon uses the name of the class before ``Command`` in low
 Which mean its name would have been the same as the one we have defined above.
 
 The :meth:`~socon.core.management.ProjectCommand.handle` method must be
-implemented and is the starting point of the command. From here you can define any behavior for that command.
+implemented and is the starting point of the command, where you can define its behavior.
 
 The :meth:`~socon.core.management.ProjectCommand.handle` method in this template is configured to get the variable ``COUNTRY``
 from the project's configuration file (:file:`config.py`) and ``SPACECRAFT`` from the common configuration file (:file:`settings.py`).
 It also parses the command line for the optional argument ``--info``.
 
 Adding Configurations
-========================
+======================
 
 Command line arguments
--------------------------
+----------------------
 
 Imagine that you want to add an argument to your command through the command line. Socon implemented
 an easy way to do that using the :meth:`~socon.core.management.BaseCommand.add_arguments`.
@@ -349,7 +338,7 @@ Should now print::
 .. highlight:: default
 
 Reading common settings
----------------------------------------
+-----------------------
 
 Imagine that you want to use a setting that is common to all
 your projects. This could for example be credentials to a shared database,
@@ -397,7 +386,7 @@ Should now print::
 .. highlight:: default
 
 Reading project settings
----------------------------------------
+------------------------
 
 The :file:`projects/artemis/management/config.py` is specific to the
 artemis project. This file is used to define project specific settings.
@@ -438,10 +427,10 @@ Should now print::
 .. highlight:: default
 
 The Common space
-=================
+================
 
 Creating common commands
----------------------------
+------------------------
 
 The common space is where we will define everything common to all projects.
 Common commands are accessible to all project by default, and can allow interesting behaviors
@@ -527,7 +516,7 @@ section a new line with ``[tutorial]``::
         launch (P)
 
 The common projectcommand
----------------------------------------
+-------------------------
 
 For this example modify :file:`deploy.py`, to:
 
@@ -606,5 +595,5 @@ Doing so the output will be:
     Deploy satellites and other payloads
 
 Congratulations! You have reached the end of the first tutorial. In the
-next tutorial :doc:`/intro/tutorials/2_change_behavior` we will learn
+next tutorial ":doc:`/intro/tutorials/2_change_behavior`" we will learn
 how to change the behavior of a project/general command in a specific project.
