@@ -946,6 +946,65 @@ class CreateCommandTests(AdminScriptTestCase):
         )
         assert path.exists()
 
+    @pytest.mark.parametrize(
+        "setting_country, project_setting_spacecraft, info",
+        [
+            (None, None, None),
+            ("France", None, None),
+            ("The Netherlands", None, "in 5 days"),
+        ],
+    )
+    def test_run_launch_command(
+        self, setting_country, project_setting_spacecraft, info, test_dir
+    ):
+        """Launch the command and check that the output is correct"""
+        name = "launch"
+        project_name = "artemis"
+        container = self._create_container(test_dir)
+        _ = self._create_project(container, project_name)
+        # From root
+        _, ccerr = self.run_socon_admin(
+            ["createcommand", name, "--type", "project", "--projectname", project_name],
+            container,
+            settings_file="testcontainer.settings",
+        )
+        assert ccerr == ""
+
+        infoargs = []
+        if info:
+            infoargs = ["--info", info]
+            info = ", " + info
+        else:
+            info = ", (no info)"
+
+        sdict = {}
+        if setting_country:
+            sdict["COUNTRY"] = '"' + setting_country + '"'
+        else:
+            setting_country = "undefined"
+
+        self.write_settings(
+            "settings.py",
+            container.joinpath("testcontainer"),
+            projects=["projects." + project_name],
+            sdict=sdict,
+        )
+
+        stdout, rcerr = self.run_test(
+            ["manage.py", name, "--project", project_name, *infoargs],
+            container,
+            settings_file="testcontainer.settings",
+        )
+        assert rcerr == ""
+        project_setting_spacecraft = (
+            project_setting_spacecraft if project_setting_spacecraft else "undefined"
+        )
+        assert (
+            "Launching {:s} from {:s}{:s}".format(
+                project_setting_spacecraft, setting_country, info
+            )
+        ) in stdout
+
     @pytest.mark.skip()
     @pytest.mark.parametrize(
         "base_dir",
