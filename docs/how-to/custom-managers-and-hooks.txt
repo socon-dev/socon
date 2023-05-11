@@ -56,15 +56,15 @@ Let's have a closer look to the :file:`managers.py`:
         lookup_module = 'builder'
 
 When Socon starts, it registers all registry configurations and imports at the
-same time every :file:`managers.py`. The import registers every ``manager`` in the
-:attr:`~socon.core.manager.BaseManager._managers` private attribute.
+same time every :file:`managers.py`. The import, registers every ``manager`` in the
+:attr:`~socon.core.manager.ManagerRegistry` class.
 
 .. _access-your-managers:
 
 Access your managers
 --------------------
 
-You can access any manager by importing the ``socon.core.manager.managers`` object.
+You can access any manager by importing :obj:`socon.core.manager.managers`.
 ``managers`` is an instance of :class:`~socon.core.manager.ManagerRegistry` class.
 Here is an example to get the ``BuildManager`` manager. We
 will pretend to have a ``build`` command that will access this manager.

@@ -24,7 +24,7 @@ __all__ = ["managers", "BaseManager", "Hook"]
 
 
 class ManagerRegistry:
-    """Base class that register all managers"""
+    """Base class that registers all managers"""
 
     def __init__(self) -> None:
         self.managers: Dict[str, Type[BaseManager]] = {}

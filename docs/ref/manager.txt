@@ -14,8 +14,8 @@ Manager Registry
 
 .. class:: ManagerRegistry
 
-    Base class that stores all the managers. At start Socon creates a
-    ``managers`` object that is accessible like that::
+    Base class that stores all the managers. At the start Socon creates a
+    ``managers`` object that is accessible like this::
 
         from socon.core.manager import managers
 
