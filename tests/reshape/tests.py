@@ -1,16 +1,16 @@
 import pytest
 
-from socon.utils.reshape import FileReshape
+from socon.utils.reshape import TemplateEngine
 
 
 @pytest.fixture()
-def example(datafix_dir) -> FileReshape:
-    reshape_file = FileReshape(datafix_dir / "example.txt")
+def example(datafix_dir) -> TemplateEngine:
+    reshape_file = TemplateEngine(datafix_dir / "example.txt")
     yield reshape_file
     reshape_file.revert_modif()
 
 
-class FileReshapeTests:
+class TemplateEngineTests:
     def test_read_file(self, example, capsys):
         """Read the content of the file that need to be reshape"""
         example.read_file()
@@ -21,7 +21,7 @@ class FileReshapeTests:
 
     def test_render_template(self, example, datafix_dir):
         """Check if we are well rendering a template with a variable"""
-        template = FileReshape(datafix_dir / "template.txt")
+        template = TemplateEngine(datafix_dir / "template.txt")
         example.render({"foo": "I'm foo variable"})
         assert example == template
 
@@ -36,7 +36,7 @@ class FileReshapeTests:
         """
         Use the reshape method to apply all modification to the current file
         """
-        template = FileReshape(datafix_dir / "template.txt")
+        template = TemplateEngine(datafix_dir / "template.txt")
         example.render({"foo": "I'm foo variable"})
         example.reshape()
         assert example == template

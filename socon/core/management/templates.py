@@ -12,7 +12,7 @@ from typing import Optional
 import socon
 
 from socon.core.management.base import BaseCommand, CommandError, Config
-from socon.utils.reshape import FileReshape
+from socon.utils.reshape import TemplateEngine
 from socon.utils.terminal import terminal
 from socon.utils.version import get_docs_version
 
@@ -57,7 +57,6 @@ class TemplateCommand(BaseCommand, abstract=True):
             "docs_version": get_docs_version(),
             "socon_version": socon.__version__,
         }
-
         template_dir = Path(socon.__path__[0], "conf", base_subdir)
 
         for root, dirs, files in os.walk(template_dir):
@@ -70,14 +69,17 @@ class TemplateCommand(BaseCommand, abstract=True):
 
             for dirname in dirs[:]:
                 # Remove __pycache__ as it's possible that when we execute a template
-                # command we try to read its content with FileReshape. This might
+                # command we try to read its content with TemplateEngine. This might
                 # cause in the worst case a decode error.
                 if dirname == "__pycache__":
                     dirs.remove(dirname)
 
             for filename in files:
                 old_path = Path(root, filename)
-                new_path = Path(top_dir, relative_dir, filename)
+                new_path = Path(
+                    top_dir, relative_dir, filename.replace(base_name, name)
+                )
+
                 for old_suffix, new_suffix in self.extensions:
                     if new_path.suffix == old_suffix:
                         new_path = new_path.with_suffix(new_suffix)
@@ -92,7 +94,7 @@ class TemplateCommand(BaseCommand, abstract=True):
                     )
 
                 # Render template files
-                template_file = FileReshape(old_path)
+                template_file = TemplateEngine(old_path)
                 template_file.render(context)
                 template_file.write(dest=new_path, encoding="utf-8")
 
@@ -102,7 +104,7 @@ class TemplateCommand(BaseCommand, abstract=True):
 
     def check_target_directory(self, target: str, name: str) -> str:
         """
-        Chech that the target directory exist. If it does not, create it.
+        Check that the target directory exist. If it does not, create it.
         """
         if target is None:
             top_dir = Path.cwd().joinpath(name)

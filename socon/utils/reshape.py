@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Union
 
 
-class FileReshape:
+class TemplateEngine:
     """Base class to modify the content of a file"""
 
     def __init__(self, filepath: Union[str, PathLike]) -> None:
@@ -19,7 +19,7 @@ class FileReshape:
             self.backup = f.read()
         self.content = self.backup
 
-    def __eq__(self, o: FileReshape) -> bool:
+    def __eq__(self, o: TemplateEngine) -> bool:
         return self.content == o.content
 
     def revert_modif(self) -> None:

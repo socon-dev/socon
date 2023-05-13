@@ -1,0 +1,43 @@
+from argparse import ArgumentParser
+
+from socon.conf import settings
+from socon.core.management.base import ProjectCommand, Config
+from socon.core.registry.base import ProjectConfig
+
+
+class {{ camel_case_projectcommand_name }}Command(ProjectCommand):
+    """
+        Projectcommand {{ projectcommand_name }}.py generated
+        using Socon {{ socon_version }}.
+    """
+    name = "{{ projectcommand_name }}"
+
+    def add_arguments(self, parser: ArgumentParser) -> None:
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--info", help="Add info to the handle command"
+        )
+
+    def handle(self, config: Config, project_config: ProjectConfig):
+        try:
+            # get common config variable
+            # defined in settings.py
+            config_country = settings.COUNTRY
+        except AttributeError:
+            config_country = "undefined"
+
+        try:
+            # get project config variable
+            # defined in config.py
+            projectconfig_spacecraft = project_config.get_setting("SPACECRAFT")
+        except ValueError:
+            projectconfig_spacecraft = "undefined"
+
+        # get optional cli argument
+        info = config.getoption("info") # cli argument
+
+        print("Launching {:s} from {:s}{:s}".format(
+            projectconfig_spacecraft,
+            config_country,
+            ", " + info if info else ", (no info)"
+        ))
