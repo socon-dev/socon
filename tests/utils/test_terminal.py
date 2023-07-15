@@ -113,6 +113,54 @@ class TerminalWriterTests:
         # even though the string is wider than the line, still have a separator
         assert line == "- aaaaaaaaaa -\n"
 
+    @pytest.mark.parametrize(
+        "newline, index",
+        [
+            (
+                "before",
+                [
+                    (
+                        0,
+                        None,
+                    ),
+                    1,
+                ],
+            ),
+            (
+                "after",
+                [
+                    (
+                        None,
+                        1,
+                    ),
+                    0,
+                ],
+            ),
+            (
+                "both",
+                [
+                    (
+                        0,
+                        2,
+                    ),
+                    1,
+                ],
+            ),
+        ],
+        ids=["before", "after", "both"],
+    )
+    def test_sep_with_newline(self, tw, newline, index) -> None:
+        # Test before
+        tw.sep("-", "hello", fullwidth=60, newline=newline)
+        lines = tw.getlines()
+        before = index[0][0]
+        after = index[0][1]
+        if before:
+            assert lines[before] == "\n"
+        assert lines[0 + index[1]] == "-" * 26 + " hello " + "-" * (27 - win32) + "\n"
+        if after:
+            assert lines[after] == "\n"
+
     def test_rewrite_with_erase(self) -> None:
         f = StringIO()
         tr = TerminalWriter(f)

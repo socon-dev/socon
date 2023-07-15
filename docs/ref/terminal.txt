@@ -85,7 +85,9 @@ Methods
 
     Create a separator line with or without a title. By default the
     separator will use the fullwidth of the terminal. A specific width
-    can be passed to the function if required.
+    can be passed to the function if required. You can also pass the `newline`
+    argument if you want to add a newline before, after or before and after the
+    separator.
 
     :param markup: Parameters of the :func:`colorize` function.
         Example: tw.sep('-', 'Hello', fg='blue')
