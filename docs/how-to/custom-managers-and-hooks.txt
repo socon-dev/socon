@@ -180,14 +180,14 @@ and the name of the hook to search for. Here is a quick example:
     class BuildCommand(ProjectCommand):
         name = 'build'
 
-    def handle(self, config, project_config):
-        manager = managers.get_manager('build')
-        manager.find_all()
-        hook = manager.search_hook_impl(project_config, 'default_builder`)
-        builder = hook()
-        builder.build(
-            type('SpaceCraft', (object,), {'name': 'Saturn Ib'})()
-        )
+        def handle(self, config, project_config):
+            manager = managers.get_manager('build')
+            manager.find_all()
+            hook = manager.search_hook_impl(project_config, 'default_builder`)
+            builder = hook()
+            builder.build(
+                type('SpaceCraft', (object,), {'name': 'Saturn Ib'})()
+            )
 
 As seen above, we are retrieving the build manager that we have defined in our previous
 example. We request the manager to :meth:`~socon.core.manager.BaseManager.find_all`
