@@ -5,7 +5,7 @@
 import shutil
 import sys
 
-from typing import Optional, TextIO, Union
+from typing import Literal, Optional, TextIO, Union
 
 color_names = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
 foreground = {color_names[x]: "3%s" % x for x in range(8)}
@@ -117,12 +117,15 @@ class TerminalWriter:
         sepchar: str,
         title: Optional[str] = None,
         fullwidth: Optional[int] = None,
+        newline: Optional[Literal["before", "after", "both"]] = None,
         **markup: dict,
     ) -> None:
         """
         Create a separator line with or without a title. By default the
         separator will use the fullwidth of the terminal. A specific width
-        can be passed to the function if required.
+        can be passed to the function if required. You can also pass the newline
+        argument if you want to add a newline before, after or before and after the
+        separator.
 
         The separator can be styled using the **markup. You can pass
         fg, bg and opts as markups.
@@ -169,7 +172,15 @@ class TerminalWriter:
         if len(line) + len(sepchar.rstrip()) <= fullwidth:
             line += sepchar.rstrip()
 
+        # add a new line before
+        if newline in ["before", "both"]:
+            self.write("\n")
+
         self.line(line, **markup)
+
+        # Add a new line after
+        if newline in ["after", "both"]:
+            self.write("\n")
 
     def write(self, msg: str, *, flush: bool = False, **markup: dict) -> None:
         """
