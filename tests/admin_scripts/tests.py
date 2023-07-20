@@ -14,7 +14,9 @@ from pathlib import Path
 import pytest
 
 from socon import conf, get_version
+from socon.core.exceptions import ImproperlyConfigured
 from socon.core.management.base import Config
+from socon.core.management.subcommand import Subcommand
 
 
 class AdminScriptTestCase:
@@ -1317,3 +1319,81 @@ class SuggestionsTests(AdminScriptTestCase):
         out, err = self.run_socon_admin(args, test_dir)
         assert out == ""
         assert "Did you mean" not in err
+
+
+class SubcommandTests(AdminScriptTestCase):
+    @pytest.fixture(autouse=True)
+    def setup(self, test_dir):
+        self.write_settings(
+            "settings.py",
+            test_dir,
+            projects=["admin_scripts.subcommands"],
+        )
+
+    def test_check_subcommand_found(self, test_dir):
+        "Check that a subcommand is correctly found"
+        args = ["base-subcommand", "sub1", "--project", "subcommands"]
+        out, err = self.run_manage(args, test_dir)
+        assert err == ""
+        assert "Subcommand of base-subcommand\n" == out
+
+    def test_check_subcommand_not_found(self, test_dir):
+        """Check that we have a nice error when a subcommand is not found"""
+        args = ["base-subcommand", "not-exist", "--project", "subcommands"]
+        out, err = self.run_manage(args, test_dir)
+        assert err == "Error: Unknown subcommand 'not-exist'\n"
+        assert "List of available subcommands:" in out
+        assert "sub1" in out
+
+    def test_no_subcommands_available(self, test_dir):
+        """
+        It's sometime possible that no command were registered.
+        Check that we correctly handle that case
+        """
+        args = ["no-subs", "--project", "subcommands"]
+        out, err = self.run_manage(args, test_dir)
+        assert err == ""
+        assert "manage.py no-subs SUBCOMMAND" in out
+        assert "No available commands"
+
+    @pytest.mark.parametrize("args", ["--help", ""])
+    def test_command_help(self, test_dir, args):
+        """Help message for the command that hold the subcommands"""
+        args = ["base-subcommand", "--project", "subcommands", args]
+        out, err = self.run_manage(args, test_dir)
+        assert err == ""
+        assert "usage: manage.py base-subcommand SUBCOMMAND" in out
+        assert "List of available subcommands:" in out
+        assert "[subcommands]" in out
+        assert "sub1" in out
+        assert "sub2" in out
+
+    def test_subcommand_help(self, test_dir):
+        """Help message for the subcommand itself"""
+        args = ["base-subcommand", "sub1", "--project", "subcommands", "--help"]
+        out, err = self.run_manage(args, test_dir)
+        assert err == ""
+        assert "usage: manage.py base-subcommand sub1" in out
+        assert "List of available subcommands:" not in out
+
+    def test_keep_extras_args_on_subcommand(self, test_dir):
+        """Check that we corretly keep the extras args for the subcommand"""
+        args = [
+            "base-subcommand",
+            "sub2",
+            "--project",
+            "subcommands",
+            "--extras",
+            "test",
+        ]
+        out, err = self.run_manage(args, test_dir)
+        assert err == ""
+        assert "['--extras', 'test']" in out
+
+    def test_subcommand_manager_not_found(self, test_dir):
+        """Each subcommand must be attached to a manager"""
+        msg = "NoSubcommandManager class must link a subcommand manager"
+        with pytest.raises(ImproperlyConfigured, match=msg):
+
+            class NoSubcommandManager(Subcommand):
+                name = "no-sub-manager"

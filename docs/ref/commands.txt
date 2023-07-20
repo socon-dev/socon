@@ -201,3 +201,25 @@ Methods
 
     The :exc:`ValueError` is raised only if ``skip`` is set to ``False``.
     Otherwise, ``getoption()`` will return ``None``
+
+Subcommand object
+=================
+
+.. module:: socon.core.management.subcommand
+
+.. class:: Subcommand
+
+    Inherit from :class:`BaseCommand`. This type of command enables you to
+    define multiple commands under one specific command.
+
+Subclassing the :class:`Subcommand` class requires that you to define the
+:attr:`~BaseCommand.subcommand_manager` attribute.
+
+Attributes
+----------
+
+.. attribute:: Subcommand.subcommand_manager
+
+    The name of the manager that holds all the subcommands. The name of that manager
+    must be different than "subcommands" as it's the name of the :class:`SubcommandManager`
+    manager.

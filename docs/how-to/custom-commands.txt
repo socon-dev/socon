@@ -4,7 +4,7 @@ Custom commands
 
 The command management module allows you to extend the functionality of your
 framework by adding commands that are common to all your projects or unique
-to one. Socon integrates two kind of commands:
+to one. Socon integrates three kind of commands:
 
 * :class:`~socon.core.management.BaseCommand` that we call general command.
   These commands are considered global as they don't require to load a
@@ -15,6 +15,11 @@ to one. Socon integrates two kind of commands:
   :class:`~socon.core.management.BaseCommand`. These commands require a project
   configuration to work. For this command to work you will need to specify the
   :option:`--project` option.
+
+* :class:`~socon.core.management.subcommand.Subcommand` inherit from
+  :class:`~socon.core.management.BaseCommand`. By subclassing your command from
+  this class, you can create a command that has it's own list of :class:`ProjectCommand`
+  and :class:`BaseCommand`.
 
 Register your commands
 ======================
@@ -368,3 +373,143 @@ allow you to do that by setting the
 :attr:`~socon.core.management.BaseCommand.keep_extras_args` to ``True``.
 This way you can access all the extra arguments through
 :attr:`~socon.core.management.Config.extras_args`.
+
+Subcommand
+==========
+
+:class:`~socon.core.management.subcommand.Subcommand` is a specific type of command.
+It enables you to define multiple commands under one specific command. To create
+a subcommand command you need to:
+
+* Create a class that inherit from :class:`~socon.core.management.subcommand.Subcommand`
+
+* Create a manager that inherit from :class:`~socon.core.management.subcommand.SubcommandManager`.
+  It's that manager that will register and hold all subcommands.
+
+* Create all your subcommands
+
+For our examples we will create a command that holds two subcommands. The architecture
+will be the following::
+
+    myframework/
+        myframework/
+            management/
+                commands/
+                    subcommands/
+                        __init__.py
+                        sub1.py
+                        sub2.py
+                    __init__.py
+                    subcommand.py
+                __init__.py
+                managers.py
+                settings.py
+        projects/
+        manage.py
+
+As a :class:`Subcommand` inherit from :class:`BaseCommand` we register the command
+in the ``commands`` folder with the following content:
+
+.. code-block:: python
+    :caption: myframework/management/commands/subcommand.py
+
+    from socon.core.management.subcommand import Subcommand
+
+
+    class BaseSubcommand(Subcommand):
+        # Name of the main command
+        name = "base-subcommand"
+
+        # Name of the manager that hold all your subcommands
+        subcommand_manager = "sub-manager"
+
+.. note::
+
+    As specified in the above section, the name of the file that hold the
+    command does not matter. We used `subcomand.py` just for the example.
+
+As you can see, we have specified the
+:attr:`~socon.core.management.subcommand.Subcommand.subcommand_manager` class
+attribute. It's that attribute that makes the link between the main command class
+and the subcommands. Now we need to declare the `sub-manager` manager. For that
+in the ``managers.py`` file we write the following content:
+
+.. code-block:: python
+    :caption: myframework/management/managers.py
+
+    from socon.core.management.subcommand import SubcommandManager
+
+    class MySubManager(SubcommandManager):
+        name = "sub-manager"
+
+.. note::
+
+    By default the :class:`~socon.core.management.subcommand.SubcommandManager` manager
+    will look into the following folder for all subcommands in the common space and
+    in every projects: ``management/commands/subcommands``.
+    If you want to redefine that, you can override the
+    :attr:`~socon.core.manager.BaseManager.lookup_module` class attribute
+    or re-define the :meth:`~socon.core.manager.BaseManager.get_modules` method.
+
+In our case, the manager will look inside the ``commands/subcommands`` folder so we will
+define our subcommands in there.
+
+.. code-block:: python
+    :caption: myframework/management/commands/subcommands/sub1.py
+
+    from socon.core.management.base import BaseCommand, Config
+
+    class SubCommandOne(BaseCommand):
+        # Name of the subcommand
+        name = "sub1"
+
+        # We specify the same manager as the subcommand_manager of the main command
+        manager = "sub-manager"
+
+        def handle(self, config: Config) -> None:
+            print("Subcommand 1 of the base-subcommand")
+
+.. code-block:: python
+    :caption: myframework/management/commands/subcommands/sub2.py
+
+    from socon.core.management.base import ProjectCommand, Config
+    from socon.core.registry.config import ProjectConfig
+
+    class SubCommandOne(ProjectCommand):
+        # Name of the subcommand
+        name = "sub2"
+
+        # We specify the same manager as the subcommand_manager of the main command
+        manager = "sub-manager"
+
+        def handle(self, config: Config, project_conig: ProjectConfig) -> None:
+            print("Subcommand 2 of the base-subcommand")
+
+Each subcommand can be of any type (ProjectCommand or BaseCommand) and can be re-define
+by each project.
+
+Subcommand usage
+----------------
+
+A command that holds a list of subcommands will have the following usage::
+
+    usage: manage.py base-subcommand SUBCOMMAND ...
+
+    ... helper of the command ...
+
+    List of available subcommands:
+
+    [myframework]
+
+        sub1
+        sub2
+
+To use a subcommand:
+
+.. code-block:: console
+
+    $ python manage.py base-subcommand sub1
+
+.. warning::
+
+    Deep subcommand (Subcommand of subcommands) is not yet supported.
