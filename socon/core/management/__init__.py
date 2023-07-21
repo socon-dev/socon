@@ -28,14 +28,14 @@ if TYPE_CHECKING:
     from socon.core.management.base import BaseCommand, CommandManager
 
 
-def get_commands() -> CommandManager:
+def get_commands(manager: str = "commands") -> CommandManager:
     """
     Return a CommandManager instance that hold all the commands. The
     registry will look for every modules in management.commands in each registry
     config. This mean the core registry config, the common config of the user
     and every projects and plugins. Core commands are always included.
     """
-    command_manager = managers.get_manager("commands")
+    command_manager = managers.get_manager(manager)
     return command_manager.find_all()
 
 
@@ -54,7 +54,8 @@ class ManagementUtility:
     def main_help_text(self) -> None:
         """Print script's main help text."""
         commands = get_commands()
-        commands.print_commands_usage(self.prog_name)
+        usage = commands.get_commands_usage(self.prog_name)
+        terminal.write(f"{usage}\n")
 
         # Output an extra note if settings are not properly configured
         if self.settings_exception is not None:

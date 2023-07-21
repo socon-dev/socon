@@ -15,7 +15,7 @@ import tempfile
 from argparse import ArgumentParser, HelpFormatter, Namespace
 from collections import OrderedDict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NoReturn, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Type, Union
 
 import socon
 
@@ -157,6 +157,13 @@ class CustomHelpFormatter(HelpFormatter):
 class CommandManager(BaseManager, name="commands"):
     lookup_module = "management.commands"
 
+    def get_usage_message(self, prog_name: str) -> List[str]:
+        return [
+            f"Type '{prog_name} help <subcommand>' for help on a specific "
+            "general (G) subcommand. If this command ",
+            "is a project (P) subcommand. Add --project <label> to the arguments.",
+        ]
+
     def get_modules(self, config: Type[RegistryConfig]) -> list:
         """
         Iterate inside management.commands in order to register
@@ -191,39 +198,51 @@ class CommandManager(BaseManager, name="commands"):
                 hooks[reg] = self.hooks[reg]
         return hooks
 
-    def print_commands_usage(self, prog_name: str) -> None:
+    def get_commands_usage(self, prog_name: str, show_registry: bool = True) -> None:
         """Nicely print commands usage"""
         # Show core, common and plugins commands. If the user wants to see
         # projects commands. They will need to specify the project
-        terminal.line(
-            "\n".join(
-                [
-                    "",
-                    f"Type '{prog_name} help <subcommand>' for help on a specific "
-                    "general (G) subcommand. If this command ",
-                    "is a project (P) subcommand. Add --project <label> to the arguments.",
-                    "",
-                ]
-            )
-        )
+        usage = ["", *self.get_usage_message(prog_name), ""]
 
+        # Sort and get every registry/config hooks
         hooks_reg = self.get_hooks_config_holder_by_order()
+
+        if not hooks_reg:
+            usage.append("No available commands")
+            return usage
+
         for reg, conf in hooks_reg.items():
-            cmd_usage = "{} commands".format(reg.title())
-            terminal.underline(cmd_usage)
+            if show_registry is True:
+                cmd_usage = "{} commands".format(reg.title())
+                usage.extend([cmd_usage, "=" * len(cmd_usage), ""])
             for config, hooks in conf.items():
-                terminal.line(f"  [{config}]\n")
+                usage.append(
+                    "{space}[{config}]\n".format(
+                        space="  " if show_registry else "", config=config
+                    )
+                )
                 for cmd_label, base_class in hooks.items():
+                    # Specify the command type with a letter
                     if issubclass(base_class, ProjectCommand):
-                        terminal.line(f"    {cmd_label} (P)")
+                        cmd_type = "P"
                     else:
-                        terminal.line(f"    {cmd_label} (G)")
+                        cmd_type = "G"
+
+                    usage.append(
+                        "{space}{cmd_label} ({cmd_type})".format(
+                            space="    " if show_registry else "  ",
+                            cmd_label=cmd_label,
+                            cmd_type=cmd_type,
+                        )
+                    )
 
                 if config != list(conf)[-1]:
-                    terminal.write("\n")
+                    usage.append("\n")
 
             if reg != list(hooks_reg)[-1]:
-                terminal.write("\n")
+                usage.append("\n")
+
+        return "\n".join(usage)
 
     def search_command(self, name: str, project: str = None) -> Type[BaseCommand]:
         """Search a command and return its class"""
@@ -396,15 +415,8 @@ class BaseCommand(Hook, abstract=True):
         parser = self.create_parser(prog_name, subcommand)
         parser.print_help()
 
-    def run_from_argv(self, argv: tuple) -> None:
-        """
-        Set up any environment changes requested (e.g., Python path
-        and Socon settings), then run this command. If the
-        command raises a ``CommandError``, intercept it and print it sensibly
-        to stderr. If the ``--traceback`` option is present or the raised
-        ``Exception`` is not ``CommandError``, raise it.
-        """
-        self._called_from_command_line = True
+    def parse_args(self, argv: tuple) -> Config:
+        """Parse command line arguments and initialize the config"""
         parser = self.create_parser(argv[0], argv[1])
 
         extras_args = []
@@ -416,12 +428,23 @@ class BaseCommand(Hook, abstract=True):
         handle_default_options(options)
 
         # Create a config object that will store all the options
-        config = self.set_config(options, extras_args)
+        return self.set_config(options, extras_args)
+
+    def run_from_argv(self, argv: tuple) -> None:
+        """
+        Set up any environment changes requested (e.g., Python path
+        and Socon settings), then run this command. If the
+        command raises a ``CommandError``, intercept it and print it sensibly
+        to stderr. If the ``--traceback`` option is present or the raised
+        ``Exception`` is not ``CommandError``, raise it.
+        """
+        self._called_from_command_line = True
+        config = self.parse_args(argv)
 
         try:
             output = self.execute(config)
         except CommandError as e:
-            if options.traceback:
+            if config.getoption("traceback"):
                 raise
             sys.stderr.write("%s: %s" % (e.__class__.__name__, e))
             sys.exit(e.returncode)
