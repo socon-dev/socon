@@ -63,7 +63,7 @@ class CommandTests:
                 assert cm.exception.code == 3
         finally:
             captured = capsys.readouterr()
-        assert "CommandError" in captured.err
+        assert captured.err == "CommandError: \n"
 
     @override_settings(
         INSTALLED_PROJECTS=["user_commands", "admin_scripts.project_with_command"],

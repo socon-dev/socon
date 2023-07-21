@@ -446,7 +446,7 @@ class BaseCommand(Hook, abstract=True):
         except CommandError as e:
             if config.getoption("traceback"):
                 raise
-            sys.stderr.write("%s: %s" % (e.__class__.__name__, e))
+            sys.stderr.write("%s: %s\n" % (e.__class__.__name__, e))
             sys.exit(e.returncode)
         else:
             if output:

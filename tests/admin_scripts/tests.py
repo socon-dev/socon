@@ -840,7 +840,7 @@ class CreateProjectTests(AdminScriptTestCase):
         # Check that we cannot create the container
         _, err = self.run_socon_admin(["createproject", "project"], test_dir)
         assert err == (
-            "CommandError: Can only create project at the root of a container"
+            "CommandError: Can only create project at the root of a container\n"
         )
 
         # Create a container and re-create the project
