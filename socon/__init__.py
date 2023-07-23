@@ -3,7 +3,7 @@
 
 from socon.utils.version import get_version
 
-VERSION = (0, 2, 0, "rc", 1)
+VERSION = (0, 2, 0, "rc", 2)
 
 __version__ = get_version(VERSION)
 
