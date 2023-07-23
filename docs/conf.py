@@ -23,7 +23,7 @@ copyright = "2023, Stephane Capponi and others"
 author = "Stephane Capponi"
 
 # The full version, including alpha/beta/rc tags
-version = "0.1.0"
+version = "0.2"
 
 # The full version, including alpha/beta/rc tags.
 try:
