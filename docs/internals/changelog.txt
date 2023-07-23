@@ -46,6 +46,8 @@ Features
 Bug Fixes:
 ----------
 
+* `#37 <https://github.com/socon-dev/socon/issues/37>`_: Fixed by calling parse_args of the called command
+
 * `#32 <https://github.com/socon-dev/socon/issues/32>`_: Fixed by adding \n (newline) to the CommandError exception handler
 
 Improved Documentation

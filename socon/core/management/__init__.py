@@ -205,27 +205,18 @@ def call_command(name: str, *args):
             except IndexError:
                 raise CommandError("Project was passed but not defined")
 
-    # Search for the command
-    command = command_manager.search_command(name, project)()
-
-    # Create the parser and save the args
-    parser = command.create_parser("", name)
-
-    # Parser the args
-    extras_args = []
-    if command.keep_extras_args:
-        cmd_args, extras_args = parser.parse_known_args(parse_args)
-    else:
-        cmd_args = parser.parse_args(parse_args)
-
-    # Create the conmand config object
-    config = command.set_config(cmd_args, extras_args)
-
     # We change the active project for the command using a context manager. This is
     # important as the execute command for a ProjectCommand, will look for
     # the SOCON_ACTIVE_PROJECT environment to set the project_config of that command.
     project = project if project else os.environ.get("SOCON_ACTIVE_PROJECT", "")
+
+    # Patch the current environment
     with set_env(SOCON_ACTIVE_PROJECT=project):
+        # Search for the command
+        command = command_manager.search_command(name, project)()
+
+        # Parse the arguments and create a config object
+        config = command.parse_args(("", name, *parse_args))
         return command.execute(config)
 
 

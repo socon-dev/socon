@@ -362,7 +362,11 @@ class BaseCommand(Hook, abstract=True):
         parse the arguments to this command.
         """
         parser = CommandParser(
-            prog="%s %s" % (os.path.basename(prog_name), subcommand),
+            prog="{prog_name}{space}{subcommand}".format(
+                prog_name=os.path.basename(prog_name),
+                space=" " if prog_name else "",
+                subcommand=subcommand,
+            ),
             description=self.help or None,
             formatter_class=CustomHelpFormatter,
             missing_args_message=getattr(self, "missing_args_message", None),

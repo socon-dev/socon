@@ -15,8 +15,10 @@ import pytest
 
 from socon import conf, get_version
 from socon.core.exceptions import ImproperlyConfigured
+from socon.core.management import call_command
 from socon.core.management.base import Config
 from socon.core.management.subcommand import Subcommand
+from socon.test.utils import override_settings
 
 
 class AdminScriptTestCase:
@@ -1390,10 +1392,30 @@ class SubcommandTests(AdminScriptTestCase):
         assert err == ""
         assert "['--extras', 'test']" in out
 
-    def test_subcommand_manager_not_found(self, test_dir):
+    def test_subcommand_manager_not_found(self):
         """Each subcommand must be attached to a manager"""
         msg = "NoSubcommandManager class must link a subcommand manager"
         with pytest.raises(ImproperlyConfigured, match=msg):
 
             class NoSubcommandManager(Subcommand):
                 name = "no-sub-manager"
+
+    @override_settings(INSTALLED_PROJECTS=["admin_scripts.subcommands"])
+    def test_call_subcommand_with_call_command(self, capsys):
+        """Call a subcommand from call_command method"""
+        call_command("base-subcommand", "sub1", "--project", "subcommands")
+        captured = capsys.readouterr()
+        assert captured.out == "Subcommand of base-subcommand\n"
+
+    @override_settings(INSTALLED_PROJECTS=["admin_scripts.subcommands"])
+    def test_call_main_sub_command_with_call_command(self, capsys):
+        """Call a subcommand from call_command method"""
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            call_command("base-subcommand", "--project", "subcommands")
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 0
+        captured = capsys.readouterr()
+        assert "usage: base-subcommand SUBCOMMAND" in captured.out
+        assert "List of available subcommands:" in captured.out
+        assert "sub1" in captured.out
+        assert "sub2" in captured.out
