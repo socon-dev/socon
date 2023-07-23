@@ -16,6 +16,54 @@ section of releases.
 
     You can retrieve all deprecations :doc:`here </internals/deprecations>`
 
+Socon 0.2.0
+===========
+
+Breaking Changes
+----------------
+
+* `#13 <https://github.com/socon-dev/socon/issues/13>`_: As Socon is still as it's premise, we allow breaking changes
+  between two MINORS. The following needs to be adapted if you were using Socon 0.1.x.
+
+  To get a manager you now need to use ``managers.get_manager`` instead of ``BaseManager.get_manager``.
+  The ``managers`` instance is accessible via ``socon.core.manager import managers``.
+
+Features
+--------
+
+* `#28 <https://github.com/socon-dev/socon/issues/28>`_: Added a new type of command called SubclassCommand. This type of command allow you to define multiple commands under one command.
+
+* `#26 <https://github.com/socon-dev/socon/issues/26>`_: The terminal.sep method now have a parameter to specify if you want to add a newline before, after or at both location (before and after)
+
+* `#11 <https://github.com/socon-dev/socon/issues/11>`_: Add a call_command(...) method to call a command internally.
+
+* `#9 <https://github.com/socon-dev/socon/issues/9>`_: Add a function to style the terminal output. This function was also implemented in the TerminalWriter.
+  This way you can directly pass the markup you want to any TerminalWriter methods.
+
+* `#6 <https://github.com/socon-dev/socon/issues/6>`_: Add a new admin command called `createcommand`.
+  This command automatically create a ProjectCommand or a BaseCommand in the common space or the specified project.
+
+Bug Fixes:
+----------
+
+* `#32 <https://github.com/socon-dev/socon/issues/32>`_: Fixed by adding \n (newline) to the CommandError exception handler
+
+Improved Documentation
+----------------------
+
+* `#27 <https://github.com/socon-dev/socon/issues/27>`_: Fix indentation in the custom-managers-and-hooks documentation.
+
+* `#15 <https://github.com/socon-dev/socon/issues/15>`_: Add examples in the README.rst
+
+* `#10 <https://github.com/socon-dev/socon/issues/10>`_: Fix typo in tutorial 1. deploy instead of deploy.py
+
+* `#4 <https://github.com/socon-dev/socon/issues/4>`_: Fix wrong path to settings.py in the first tutorial
+
+Trivial/Internal Changes
+------------------------
+
+* `#8 <https://github.com/socon-dev/socon/issues/8>`_: Add pre-commit, fix and run isort
+
 Socon 0.1.1
 ===========
 
