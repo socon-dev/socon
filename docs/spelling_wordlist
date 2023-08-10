@@ -58,3 +58,6 @@ basecommands
 Subcommand
 subcommand
 subcommands
+isort
+pyproject
+toml

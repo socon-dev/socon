@@ -10,7 +10,6 @@ from socon.core.management.base import (
     Config,
     handle_default_options,
 )
-from socon.utils.terminal import terminal
 
 
 class SubcommandManager(CommandManager):
@@ -59,7 +58,7 @@ class Subcommand(BaseCommand, abstract=True):
         commands = self.get_subcommands()
         usage = commands.get_commands_usage(prog_name, show_registry=False)
         super().print_help(prog_name, subcommand)
-        terminal.write("{}\n\n".format(usage))
+        sys.stdout.write("{}\n\n".format(usage))
 
     def parse_args(self, argv: tuple) -> Config:
         """Parse command line arguments for subcommands"""
