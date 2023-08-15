@@ -16,6 +16,8 @@ section of releases.
 
     You can retrieve all deprecations :doc:`here </internals/deprecations>`
 
+.. towncrier release notes start
+
 Socon 0.2.0
 ===========
 
