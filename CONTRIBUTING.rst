@@ -211,6 +211,12 @@ Find below an example on how to fork Socon and make a pull request:
       $ python -m pip install -r requirement/requirements.txt
       $ pytest -v
 
+#. Create a new changelog entry in `changelog` directory. The file should be named
+   <issueid>.<type>.rst, where issueid is the number of the issue related to
+   the change and type is one of feature, improvement, bugfix, doc, deprecation,
+   breaking, or trivial. You may skip creating the changelog entry if the
+   change doesn't affect the documented behaviour of socon.
+
 #. Add yourself to AUTHORS file if not there yet, in alphabetical order.
 
 #. Commit and push once your tests pass and you are happy with your changes::
