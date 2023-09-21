@@ -1419,3 +1419,9 @@ class SubcommandTests(AdminScriptTestCase):
         assert "List of available subcommands:" in captured.out
         assert "sub1" in captured.out
         assert "sub2" in captured.out
+
+    def test_access_config_attribute(self, test_dir):
+        """Check that we can access the config attribute. Test for #42"""
+        args = ["base-subcommand", "sub-config", "--project", "subcommands"]
+        _, err = self.run_manage(args, test_dir)
+        assert err == ""
