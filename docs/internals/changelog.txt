@@ -16,6 +16,15 @@ section of releases.
 
     You can retrieve all deprecations :doc:`here </internals/deprecations>`
 
+Socon 0.2.1
+===========
+
+Bug Fixes:
+----------
+
+* `#42 <https://github.com/socon-dev/socon/issues/42>`_: Fixed by saving the subcommand and calling
+  the right method to set the config attribute.
+
 Socon 0.2.0
 ===========
 

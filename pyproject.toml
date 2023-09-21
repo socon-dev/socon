@@ -38,8 +38,8 @@ homepage = "https://socon.readthedocs.io/en/latest/"
 repository = "https://github.com/socon-dev/socon"
 changelog = "https://github.com/socon-dev/socon/blob/master/docs/internals/changelog.txt"
 
-[tool.setuptools]
-packages = ["socon"]
+[tool.setuptools.packages.find]
+include = ["socon*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "socon.__version__"}
