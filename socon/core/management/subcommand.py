@@ -91,11 +91,13 @@ class Subcommand(BaseCommand, abstract=True):
         # message when we run the subcommand.
         setattr(options, "subcommand", subcommand)
 
+        # Save the subcommand for later use in the handle method. This is to avoid
+        # to seach again for the command and initialize it with no config. #42
+        self.__subcommand = command
+
         # Create a config object that will store all the options
-        return command.baseconfig(options, extras_args)
+        return command.set_config(options, extras_args)
 
     def handle(self, config: Config):
         """Execute the subcommand"""
-        subcommand = config.getoption("subcommand")
-        command = self.get_subcommand(subcommand, self.argv)
-        return command.execute(config)
+        return self.__subcommand.execute(config)
