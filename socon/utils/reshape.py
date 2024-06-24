@@ -55,7 +55,7 @@ class TemplateEngine:
 
     def render(self, context: dict) -> str:
         """Render a specific template with tag like {{ value }}"""
-        search_tag = re.findall(r"({{ (.*) }})", self.content)
+        search_tag = re.findall(r"({{ (\S*) }})", self.content)
         if search_tag:
             self.content = self._compile(search_tag, context)
         return self.content
