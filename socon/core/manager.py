@@ -316,7 +316,7 @@ class BaseManager:
         # Save in the registry the config label associated with
         # the label of the hook and its class. If the label already
         # exist we raise an ImportError
-        if any(hook_name in n for n in configs.get(config.label, [])):
+        if any(hook_name == n for n in configs.get(config.label, [])):
             raise ImproperlyConfigured(
                 "'{}' already exists. Duplicates:\n{}".format(hook_name, configs)
             )
