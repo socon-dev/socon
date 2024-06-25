@@ -165,7 +165,7 @@ For that we will modify the :file:`build.py` command in the common space.
 
     from socon.core.management.base import Config, ProjectCommand
     from socon.core.registry.base import ProjectConfig
-    from socon.core.manager.base import managers
+    from socon.core.manager import managers
 
 
     class BuildCommand(ProjectCommand):

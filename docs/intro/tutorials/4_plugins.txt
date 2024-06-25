@@ -82,7 +82,7 @@ The code for :file:`count.py`:
 
 .. code-block:: python
 
-    from socon.core.manager.base import managers
+    from socon.core.manager import managers
     from socon.core.management.base import BaseCommand, Config
     from socon.core.registry import projects
 
